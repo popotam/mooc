@@ -6,10 +6,10 @@
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
-fruits = ['apples','oranges','pears','bananas']
+fruits = ['apples', 'oranges', 'pears', 'bananas']
 for fruit in fruits:
     print fruit + ' for sale'
-    
-fruitPrices = {'apples':2.00, 'oranges': 1.50, 'pears': 1.75}
+
+fruitPrices = {'apples': 2.00, 'oranges': 1.50, 'pears': 1.75}
 for fruit, price in fruitPrices.items():
     print '%s cost %f a pound' % (fruit, price)

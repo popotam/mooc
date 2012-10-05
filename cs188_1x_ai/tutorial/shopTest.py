@@ -16,7 +16,7 @@ print applePrice
 print('Apples cost $%.2f at %s.' % (applePrice, shopName))
 
 otherName = 'the Stanford Mall'
-otherFruitPrices = {'kiwis':6.00, 'apples': 4.50, 'peaches': 8.75}
+otherFruitPrices = {'kiwis': 6.00, 'apples': 4.50, 'peaches': 8.75}
 otherFruitShop = shop.FruitShop(otherName, otherFruitPrices)
 otherPrice = otherFruitShop.getCostPerPound('apples')
 print otherPrice

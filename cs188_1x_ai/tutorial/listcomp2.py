@@ -6,5 +6,5 @@
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
-strings = ['Some string','Art','Music','Artificial Intelligence']
+strings = ['Some string', 'Art', 'Music', 'Artificial Intelligence']
 print [x.lower() for x in strings if len(x) > 5]
