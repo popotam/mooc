@@ -79,7 +79,7 @@ def nullHeuristic(state, problem=None):
     return 0
 
 
-State = collections.namedtuple("State", "node path cost")
+SearchNode = collections.namedtuple("SearchNode", "state path cost")
 
 STORAGE_FACTORIES = {
     'dfs': lambda problem, heuristic: util.Stack(),
@@ -88,7 +88,7 @@ STORAGE_FACTORIES = {
             util.PriorityQueueWithFunction(lambda x: x.cost),
     'astar': lambda problem, heuristic:
             util.PriorityQueueWithFunction(
-                    lambda x: x.cost + heuristic(x.node, problem)),
+                    lambda x: x.cost + heuristic(x.state, problem)),
 }
 
 
@@ -98,23 +98,24 @@ def pathfinder_factory(algorithm):
     def pathfinder(problem, heuristic=nullHeuristic):
         closed = set()
         queue = storage_factory(problem, heuristic)
-        queue.push(State(problem.getStartState(), (), 0))
+        queue.push(SearchNode(problem.getStartState(), (), 0))
         while not queue.isEmpty():
-            state = queue.pop()
-            # print state
-            if problem.isGoalState(state.node):
-                return list(state.path)
-            if state.node in closed:
+            node = queue.pop()
+            print node
+            if problem.isGoalState(node.state):
+                # print node.path
+                return list(node.path)
+            if node.state in closed:
                 continue
-            closed.add(state.node)
-            for raw_succesor in problem.getSuccessors(state.node):
-                succesor = State(*raw_succesor)
-                fringe_state = State(succesor.node,
-                                     state.path + (succesor.path,),
-                                     state.cost + succesor.cost)
+            closed.add(node.state)
+            for raw_succesor in problem.getSuccessors(node.state):
+                succesor = SearchNode(*raw_succesor)
+                fringe_state = SearchNode(succesor.state,
+                                          node.path + (succesor.path,),
+                                          node.cost + succesor.cost)
                 queue.push(fringe_state)
 
-            if False and state.cost > 1010:
+            if False and node.cost > 1010:
                 break
     return pathfinder
 
