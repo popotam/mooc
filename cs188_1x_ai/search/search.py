@@ -11,12 +11,15 @@ In search.py, you will implement generic search algorithms which are called
 by Pacman agents (in searchAgents.py).
 """
 
+import collections
 import util
+
 
 class SearchProblem:
     """
-    This class outlines the structure of a search problem, but doesn't implement
-    any of the methods (in object-oriented terminology: an abstract class).
+    This class outlines the structure of a search problem,
+    but doesn't implement any of the methods
+    (in object-oriented terminology: an abstract class).
 
     You do not need to change anything in this class, ever.
     """
@@ -51,16 +54,19 @@ class SearchProblem:
         """
          actions: A list of actions to take
 
-        This method returns the total cost of a particular sequence of actions.  The sequence must
+        This method returns the total cost of a particular sequence of actions.
+        The sequence must
         be composed of legal moves
         """
         util.raiseNotDefined()
 
 
 def tinyMazeSearch(problem):
-    """
-    Returns a sequence of moves that solves tinyMaze.  For any other
-    maze, the sequence of moves will be incorrect, so only use this for tinyMaze
+    """Returns a sequence of moves that solves tinyMaze.
+
+    For any other maze, the sequence of moves will be incorrect,
+    so only use this for tinyMaze
+
     """
     from game import Directions
     s = Directions.SOUTH
@@ -68,13 +74,30 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 
-def pathfinder_factory(storage_class):
-    import collections
-    State = collections.namedtuple("State", "node path cost")
+def nullHeuristic(state, problem=None):
+    """Trivial heuristic"""
+    return 0
 
-    def pathfinder(problem):
+
+State = collections.namedtuple("State", "node path cost")
+
+STORAGE_FACTORIES = {
+    'dfs': lambda problem, heuristic: util.Stack(),
+    'bfs': lambda problem, heuristic: util.Queue(),
+    'ucs': lambda problem, heuristic:
+            util.PriorityQueueWithFunction(lambda x: x.cost),
+    'astar': lambda problem, heuristic:
+            util.PriorityQueueWithFunction(
+                    lambda x: x.cost + heuristic(x.node, problem)),
+}
+
+
+def pathfinder_factory(algorithm):
+    storage_factory = STORAGE_FACTORIES[algorithm]
+
+    def pathfinder(problem, heuristic=nullHeuristic):
         closed = set()
-        queue = storage_class()
+        queue = storage_factory(problem, heuristic)
         queue.push(State(problem.getStartState(), (), 0))
         while not queue.isEmpty():
             state = queue.pop()
@@ -96,25 +119,10 @@ def pathfinder_factory(storage_class):
     return pathfinder
 
 
-depthFirstSearch = pathfinder_factory(util.Stack)
-breadthFirstSearch = pathfinder_factory(util.Queue)
-uniformCostSearch = pathfinder_factory(
-        lambda: util.PriorityQueueWithFunction(lambda x: x.cost))
-
-
-def nullHeuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
-
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    "Search the node that has the lowest combined cost and heuristic first."
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+depthFirstSearch = pathfinder_factory('dfs')
+breadthFirstSearch = pathfinder_factory('bfs')
+uniformCostSearch = pathfinder_factory('ucs')
+aStarSearch = pathfinder_factory('astar')
 
 # Abbreviations
 bfs = breadthFirstSearch
