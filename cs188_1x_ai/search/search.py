@@ -65,39 +65,42 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s,s,w,s,w,w,s,w]
+    return  [s, s, w, s, w, w, s, w]
 
-def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first
-    [2nd Edition: p 75, 3rd Edition: p 87]
 
-    Your search algorithm needs to return a list of actions that reaches
-    the goal.  Make sure to implement a graph search algorithm
-    [2nd Edition: Fig. 3.18, 3rd Edition: Fig 3.7].
+def pathfinder_factory(storage_class):
+    import collections
+    State = collections.namedtuple("State", "node path cost")
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
+    def pathfinder(problem):
+        closed = set()
+        queue = storage_class()
+        queue.push(State(problem.getStartState(), (), 0))
+        while not queue.isEmpty():
+            state = queue.pop()
+            # print state
+            if problem.isGoalState(state.node):
+                return list(state.path)
+            if state.node in closed:
+                continue
+            closed.add(state.node)
+            for raw_succesor in problem.getSuccessors(state.node):
+                succesor = State(*raw_succesor)
+                fringe_state = State(succesor.node,
+                                     state.path + (succesor.path,),
+                                     state.cost + succesor.cost)
+                queue.push(fringe_state)
 
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+            if False and state.cost > 1010:
+                break
+    return pathfinder
 
-def breadthFirstSearch(problem):
-    """
-    Search the shallowest nodes in the search tree first.
-    [2nd Edition: p 73, 3rd Edition: p 82]
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
-def uniformCostSearch(problem):
-    "Search the node of least total cost first. "
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+depthFirstSearch = pathfinder_factory(util.Stack)
+breadthFirstSearch = pathfinder_factory(util.Queue)
+uniformCostSearch = pathfinder_factory(
+        lambda: util.PriorityQueueWithFunction(lambda x: x.cost))
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -105,6 +108,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
