@@ -101,7 +101,7 @@ def pathfinder_factory(algorithm):
         queue.push(SearchNode(problem.getStartState(), (), 0))
         while not queue.isEmpty():
             node = queue.pop()
-            print node
+            # print node
             if problem.isGoalState(node.state):
                 # print node.path
                 return list(node.path)
