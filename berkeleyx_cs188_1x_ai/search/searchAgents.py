@@ -224,6 +224,30 @@ class PositionSearchProblem(search.SearchProblem):
         return cost
 
 
+class FarthestFoodSearchProblem(PositionSearchProblem):
+    def __init__(self, food, gameState, costFn=lambda x: 1,
+                 goal=(1, 1), start=None, warn=True):
+        self.walls = gameState.getWalls()
+        self.startState = gameState.getPacmanPosition()
+        if start != None:
+            self.startState = start
+        self.goal = goal
+        self.costFn = costFn
+        if warn and (gameState.getNumFood() != 1 or not gameState.hasFood(*goal)):
+            print 'Warning: this does not look like a regular search maze'
+
+        # For display purposes
+        self._visited, self._visitedlist, self._expanded = {}, [], 0
+        self.food = food.copy()
+
+    def isGoalState(self, state):
+        x, y = state
+        self.food[x][y] = False
+        if self.food.count() == 0:
+            return True
+        return False
+
+
 class StayEastSearchAgent(SearchAgent):
     """
     An agent for position search with a cost function that penalizes being in
@@ -474,11 +498,18 @@ def foodHeuristic(state, problem):
     x, y = position
     if not foodGrid.count():
         return 0
+    prob = FarthestFoodSearchProblem(
+                foodGrid, problem.startingGameState, start=position,
+                goal=None, warn=False)
+    return len(search.bfs(prob))
+
+    """
     distances = [
         ((x - fx) ** 2 + (y - fy) ** 2) ** 0.5
         for fx, fy in foodGrid.asList()
     ]
     return max(distances)
+    """
     """
     return (float(sum(manhattan_distances)) /
             problem.startingGameState.getFood().count())
