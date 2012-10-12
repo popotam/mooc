@@ -505,7 +505,7 @@ def foodHeuristic(state, problem):
 
     """
     distances = [
-        ((x - fx) ** 2 + (y - fy) ** 2) ** 0.5
+        abs(x - fx) + abs(y - fy)
         for fx, fy in foodGrid.asList()
     ]
     return max(distances)
