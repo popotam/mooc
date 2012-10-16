@@ -9,18 +9,13 @@ def evaluatePoly(poly, x):
     '''
     Computes the value of a polynomial function at given value x. Returns that
     value as a float.
- 
+
     poly: list of numbers, length > 0
     x: number
     returns: float
     '''
     # FILL IN YOUR CODE HERE...
-
-
-
-
-
-
+    return float(sum(coef * x ** exp for exp, coef in enumerate(poly)))
 
 
 # Problem 2: Derivatives
@@ -28,14 +23,14 @@ def computeDeriv(poly):
     '''
     Computes and returns the derivative of a polynomial function as a list of
     floats. If the derivative is 0, returns [0.0].
- 
+
     poly: list of numbers, length &gt; 0
     returns: list of numbers (floats)
     '''
     # FILL IN YOUR CODE HERE...
-
-
-
+    if len(poly) == 1:
+        return [0.0]
+    return [float(coef * exp) for exp, coef in enumerate(poly)][1:]
 
 
 # Problem 3: Newton's Method
@@ -44,7 +39,7 @@ def computeRoot(poly, x_0, epsilon):
     Uses Newton's method to find and return a root of a polynomial function.
     Returns a list containing the root and the number of iterations required
     to get to the root.
- 
+
     poly: list of numbers, length > 1.
          Represents a polynomial function containing at least one real root.
          The derivative of this polynomial function at x_0 is not 0.
@@ -53,3 +48,10 @@ def computeRoot(poly, x_0, epsilon):
     returns: list [float, int]
     '''
     # FILL IN YOUR CODE HERE...
+    iteration = 0
+    root = x_0
+    derivative = computeDeriv(poly)
+    while abs(evaluatePoly(poly, root)) > epsilon:
+        iteration += 1
+        root -= evaluatePoly(poly, root) / evaluatePoly(derivative, root)
+    return [root, iteration]
