@@ -159,7 +159,47 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        num_agents = gameState.getNumAgents()
+        maxdepth = self.depth
+
+        def next_depth_and_agent(depth, agent):
+            agent += 1
+            if agent >= num_agents:
+                return depth + 1, 0
+            return depth, agent
+
+        def minmax(state, depth, agent):
+            if depth >= maxdepth:
+                leaf_score = self.evaluationFunction(state)
+                # print "leaf", depth, agent, leaf_score
+                return [], leaf_score
+
+            legal_actions = state.getLegalActions(agent)
+            if not legal_actions:
+                return [], self.evaluationFunction(state)
+
+            if agent == 0:
+                compare = lambda score, best_score: score > best_score
+                best_score = -1000000
+            else:
+                compare = lambda score, best_score: score < best_score
+                best_score = 1000000
+
+            best_path = []
+            for action in legal_actions:
+                if action == Directions.STOP:
+                    continue
+                successor = state.generateSuccessor(agent, action)
+                path, score = minmax(successor,
+                                     *next_depth_and_agent(depth, agent))
+                if compare(score, best_score):
+                    best_path = [action] + path
+                    best_score = score
+
+            # print "node", depth, agent, best_score, best_path
+            return best_path, best_score
+
+        return minmax(gameState, 0, 0)[0][0]
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
