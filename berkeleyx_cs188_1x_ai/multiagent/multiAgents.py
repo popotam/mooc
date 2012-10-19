@@ -168,6 +168,49 @@ def minmax(state, depth, agent, evaluate):
     return best_path, best_score
 
 
+def alphabeta(state, depth, agent, evaluate, alpha=(-1000000), beta=1000000):
+    if depth == 0:
+        leaf_score = evaluate(state)
+        # print "leaf", depth, agent, leaf_score
+        return [], leaf_score
+
+    legal_actions = state.getLegalActions(agent)
+    if not legal_actions:
+        return [], evaluate(state)
+
+    best_path = []
+    for action in legal_actions:
+        if action == Directions.STOP:
+            continue
+        successor = state.generateSuccessor(agent, action)
+
+        # handle depth and agent
+        next_agent = agent + 1
+        next_depth = depth
+        if next_agent >= state.getNumAgents():
+            next_agent = 0
+            next_depth -= 1
+
+        # recurse
+        path, score = alphabeta(successor, next_depth, next_agent, evaluate,
+                                alpha, beta)
+
+        # do alphabeta stuff
+        if agent == 0:
+            if alpha < score:
+                alpha = score
+                best_path = [action] + path
+        else:
+            if beta > score:
+                beta = score
+                best_path = [action] + path
+        if beta <= alpha:
+            break
+
+    # print "node", depth, agent, alpha, beta, best_path
+    return best_path, alpha if agent == 0 else beta
+
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
         Your minimax agent (question 2)
@@ -208,7 +251,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return alphabeta(gameState, self.depth, 0,
+                         self.evaluationFunction)[0][0]
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
