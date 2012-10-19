@@ -132,6 +132,42 @@ class MultiAgentSearchAgent(Agent):
         self.depth = int(depth)
 
 
+def minmax(state, depth, agent, evaluate):
+    if depth == 0:
+        leaf_score = evaluate(state)
+        # print "leaf", depth, agent, leaf_score
+        return [], leaf_score
+
+    legal_actions = state.getLegalActions(agent)
+    if not legal_actions:
+        return [], evaluate(state)
+
+    if agent == 0:
+        compare = lambda score, best_score: score > best_score
+        best_score = -1000000
+    else:
+        compare = lambda score, best_score: score < best_score
+        best_score = 1000000
+
+    best_path = []
+    for action in legal_actions:
+        if action == Directions.STOP:
+            continue
+        successor = state.generateSuccessor(agent, action)
+        next_agent = agent + 1
+        next_depth = depth
+        if next_agent >= state.getNumAgents():
+            next_agent = 0
+            next_depth -= 1
+        path, score = minmax(successor, next_depth, next_agent, evaluate)
+        if compare(score, best_score):
+            best_path = [action] + path
+            best_score = score
+
+    # print "node", depth, agent, best_score, best_path
+    return best_path, best_score
+
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
         Your minimax agent (question 2)
@@ -159,47 +195,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        num_agents = gameState.getNumAgents()
-        maxdepth = self.depth
-
-        def next_depth_and_agent(depth, agent):
-            agent += 1
-            if agent >= num_agents:
-                return depth + 1, 0
-            return depth, agent
-
-        def minmax(state, depth, agent):
-            if depth >= maxdepth:
-                leaf_score = self.evaluationFunction(state)
-                # print "leaf", depth, agent, leaf_score
-                return [], leaf_score
-
-            legal_actions = state.getLegalActions(agent)
-            if not legal_actions:
-                return [], self.evaluationFunction(state)
-
-            if agent == 0:
-                compare = lambda score, best_score: score > best_score
-                best_score = -1000000
-            else:
-                compare = lambda score, best_score: score < best_score
-                best_score = 1000000
-
-            best_path = []
-            for action in legal_actions:
-                if action == Directions.STOP:
-                    continue
-                successor = state.generateSuccessor(agent, action)
-                path, score = minmax(successor,
-                                     *next_depth_and_agent(depth, agent))
-                if compare(score, best_score):
-                    best_path = [action] + path
-                    best_score = score
-
-            # print "node", depth, agent, best_score, best_path
-            return best_path, best_score
-
-        return minmax(gameState, 0, 0)[0][0]
+        return minmax(gameState, self.depth, 0, self.evaluationFunction)[0][0]
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
