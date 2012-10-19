@@ -142,6 +142,14 @@ def minmax(state, depth, agent, evaluate):
     if not legal_actions:
         return [], evaluate(state)
 
+    # handle depth and agent
+    next_agent = agent + 1
+    next_depth = depth
+    if next_agent >= state.getNumAgents():
+        next_agent = 0
+        next_depth -= 1
+
+    # max or min
     if agent == 0:
         compare = lambda score, best_score: score > best_score
         best_score = -1000000
@@ -154,12 +162,11 @@ def minmax(state, depth, agent, evaluate):
         if action == Directions.STOP:
             continue
         successor = state.generateSuccessor(agent, action)
-        next_agent = agent + 1
-        next_depth = depth
-        if next_agent >= state.getNumAgents():
-            next_agent = 0
-            next_depth -= 1
+
+        # recurse
         path, score = minmax(successor, next_depth, next_agent, evaluate)
+
+        # compare
         if compare(score, best_score):
             best_path = [action] + path
             best_score = score
@@ -178,18 +185,18 @@ def alphabeta(state, depth, agent, evaluate, alpha=(-1000000), beta=1000000):
     if not legal_actions:
         return [], evaluate(state)
 
+    # handle depth and agent
+    next_agent = agent + 1
+    next_depth = depth
+    if next_agent >= state.getNumAgents():
+        next_agent = 0
+        next_depth -= 1
+
     best_path = []
     for action in legal_actions:
         if action == Directions.STOP:
             continue
         successor = state.generateSuccessor(agent, action)
-
-        # handle depth and agent
-        next_agent = agent + 1
-        next_depth = depth
-        if next_agent >= state.getNumAgents():
-            next_agent = 0
-            next_depth -= 1
 
         # recurse
         path, score = alphabeta(successor, next_depth, next_agent, evaluate,
@@ -209,6 +216,42 @@ def alphabeta(state, depth, agent, evaluate, alpha=(-1000000), beta=1000000):
 
     # print "node", depth, agent, alpha, beta, best_path
     return best_path, alpha if agent == 0 else beta
+
+
+def expectimax(state, depth, agent, evaluate):
+    if depth == 0:
+        leaf_score = evaluate(state)
+        # print "leaf", depth, agent, leaf_score
+        return [], leaf_score
+
+    legal_actions = state.getLegalActions(agent)
+    if not legal_actions:
+        return [], evaluate(state)
+
+    # handle depth and agent
+    next_agent = agent + 1
+    next_depth = depth
+    if next_agent >= state.getNumAgents():
+        next_agent = 0
+        next_depth -= 1
+
+    scores = [
+        (expectimax(state.generateSuccessor(agent, action),
+                    next_depth, next_agent, evaluate),
+         action)
+        for action in legal_actions if action != Directions.STOP
+    ]
+    scores = [(score, index, path, action)
+              for index, ((path, score), action) in enumerate(scores)]
+    if agent == 0:
+        best_score, _, path, action = max(scores)
+        best_path = [action] + path
+    else:
+        best_score = sum([score[0] for score in scores]) / len(scores)
+        best_path = ['random_ghost']
+
+    # print "node", depth, agent, best_score, best_path
+    return best_path, best_score
 
 
 class MinimaxAgent(MultiAgentSearchAgent):
@@ -269,7 +312,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return expectimax(gameState, self.depth, 0,
+                          self.evaluationFunction)[0][0]
 
 
 def betterEvaluationFunction(currentGameState):
