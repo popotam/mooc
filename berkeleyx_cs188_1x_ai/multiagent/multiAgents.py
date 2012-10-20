@@ -52,7 +52,7 @@ class ReflexAgent(Agent):
 
         return legalMoves[chosenIndex]
 
-    def evaluationFunction(self, currentGameState, action):
+    def evaluationFunction(self, state, action):
         """
         Design a better evaluation function here.
 
@@ -71,23 +71,20 @@ class ReflexAgent(Agent):
 
         """
         # Useful information you can extract from a GameState (pacman.py)
-        successorGameState = currentGameState.generatePacmanSuccessor(action)
-        newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer
-                          for ghostState in newGhostStates]
-        food_distances = [float(manhattanDistance(newPos, food))
-                          for food in newFood.asList()]
+        state = state.generatePacmanSuccessor(action)
+        pos = state.getPacmanPosition()
+        foods = state.getFood()
+        ghosts = state.getGhostStates()
+        food_distances = [float(manhattanDistance(pos, food))
+                          for food in foods.asList()]
         nearest_food = min(food_distances) if food_distances else 0
-        ghost_distance = min(manhattanDistance(newPos, ghost.getPosition())
-                             for ghost in newGhostStates)
+        ghost_distance = min(manhattanDistance(pos, ghost.getPosition())
+                             for ghost in ghosts)
         penalty = {
             0: 1000,
             1: 500,
         }.get(ghost_distance, 0)
-        score = successorGameState.getScore()
-        "*** YOUR CODE HERE ***"
+        score = state.getScore()
         evaluation = score - 30 * len(food_distances) - nearest_food - penalty
         # suicide if score too low
         if score < -20 and ghost_distance > 0:
@@ -99,7 +96,7 @@ class ReflexAgent(Agent):
         return evaluation
 
 
-def scoreEvaluationFunction(currentGameState):
+def scoreEvaluationFunction(state):
     """
         This default evaluation function just returns the score of the state.
         The score is the same one displayed in the Pacman GUI.
@@ -107,7 +104,7 @@ def scoreEvaluationFunction(currentGameState):
         This evaluation function is meant for use with adversarial
         search agents (not reflex agents).
     """
-    return currentGameState.getScore()
+    return state.getScore()
 
 
 class MultiAgentSearchAgent(Agent):
@@ -316,15 +313,71 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                           self.evaluationFunction)[0][0]
 
 
-def betterEvaluationFunction(currentGameState):
+def betterEvaluationFunction(state):
     """
-        Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-        evaluation function (question 5).
+    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+    evaluation function (question 5).
 
-        DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION:
+    It's really very simple, those are the factors I've used:
+     * gameState score
+     * penalty for manhatan distance to nearest food - weight is 1,
+       just to push pacman in the correct direction (to break ties)
+     * 30 points of penalty for every dot not eaten - 30 is enough to
+       compensate for previous factor increasing due to eaten dot -
+       this way pacman would not hesitate to eat a dot
+     * 1000 penalty for walking on ghost or 500 for walking to a tile
+       near a ghost - simple evasion
+     * 1000 bonus for eating a scared ghost or 500 for walking to a tile
+       near a scared ghost - this bonus is enabled only if previous
+       penalty is not occuring (if there are no non-scared ghosts
+       protecting their brethren)
+     * 100 penalty for every capsule not eaten - simple way to make sure
+       pacman eats a capsule, whenever he walks by it. On this layout
+       pacman doesn't need to be proactive in hunting, he would walk near
+       a capsule anyway.
+
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    GHOST_DISTANCE_FACTOR = {
+        0: 1000,
+        1: 500,
+    }
+    pos = state.getPacmanPosition()
+    foods = state.getFood()
+    ghosts = state.getGhostStates()
+    not_eaten_capsules = len(state.getCapsules())
+
+    # penalty for distance to nearest food
+    food_distances = [float(manhattanDistance(pos, food))
+                      for food in foods.asList()]
+    nearest_food = min(food_distances) if food_distances else 0
+
+    # ghost penalty
+    ghost_distances = [manhattanDistance(pos, ghost.getPosition())
+                       for ghost in ghosts if ghost.scaredTimer < 2]
+    if ghost_distances:
+        ghost_penalty = GHOST_DISTANCE_FACTOR.get(min(ghost_distances), 0)
+    else:
+        ghost_penalty = 0
+
+    # ghost bonus
+    scared_ghosts = [manhattanDistance(pos, ghost.getPosition())
+                     for ghost in ghosts if ghost.scaredTimer >= 2]
+    if not ghost_penalty and scared_ghosts:
+        ghost_bonus = GHOST_DISTANCE_FACTOR.get(min(scared_ghosts), 0)
+    else:
+        ghost_bonus = 0
+
+    # evaluate
+    evaluation = (
+        state.getScore()
+        - 30 * foods.count()
+        - nearest_food
+        - ghost_penalty
+        + ghost_bonus
+        - 100 * not_eaten_capsules
+    )
+    return evaluation
 
 # Abbreviation
 better = betterEvaluationFunction
