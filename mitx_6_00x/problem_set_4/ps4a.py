@@ -80,7 +80,8 @@ def getWordScore(word, n):
     n: integer (HAND_SIZE; i.e., hand size required for additional points)
     returns: int >= 0
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    return (sum(SCRABBLE_LETTER_VALUES[letter] for letter in word) * len(word)
+            + (50 if len(word) == n else 0))
 
 
 #
@@ -152,7 +153,10 @@ def updateHand(hand, word):
     hand: dictionary (string -> int)
     returns: dictionary (string -> int)
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    hand = hand.copy()
+    for letter in word:
+        hand[letter] -= 1
+    return hand
 
 
 #
@@ -169,7 +173,14 @@ def isValidWord(word, hand, wordList):
     hand: dictionary (string -> int)
     wordList: list of lowercase strings
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    if word not in wordList:
+        return False
+    for key, value in getFrequencyDict(word).iteritems():
+        if key not in hand:
+            return False
+        if hand[key] < value:
+            return False
+    return True
 
 
 #
@@ -183,7 +194,7 @@ def calculateHandlen(hand):
     hand: dictionary (string-> int)
     returns: integer
     """
-    # TO DO... <-- Remove this comment when you code this function
+    return sum(count for count in hand.itervalues())
 
 
 def playHand(hand, wordList, n):
