@@ -45,7 +45,7 @@ def x_ian(x, word):
 #
 # Problem 5: Typewriter
 #
-def insertNewlines(text, lineLength):
+def insertNewlines(text, lineLength, acu=0):
     """
     Given text and a desired line length, wrap the text as a typewriter would.
     Insert a newline character ("\n") after each word that reaches or exceeds
@@ -56,4 +56,8 @@ def insertNewlines(text, lineLength):
         the next word.
     returns: a string, with newline characters inserted appropriately.
     """
-    # ## TODO.
+    if not text:
+        return ""
+    if acu >= lineLength - 1 and text[0] == ' ':
+        return " \n" + insertNewlines(text[1:], lineLength, 0)
+    return text[0] + insertNewlines(text[1:], lineLength, acu + 1)
