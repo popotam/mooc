@@ -37,3 +37,9 @@ def test_myLog():
     print "r2", r2
     assert r1 == 4
     assert r2 == 2
+
+
+def test_nuggets():
+    from midterm1 import McNuggets
+    assert McNuggets(15)
+    assert not McNuggets(16)

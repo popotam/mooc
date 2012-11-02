@@ -78,3 +78,19 @@ def myLog(x, b):
     while b ** (guess + 1) <= x:
         guess += 1
     return guess
+
+
+def McNuggets(n):
+    """
+    n is an int
+
+    Returns True if some integer combination of 6, 9 and 20 equals n
+    Otherwise returns False.
+    """
+    packages = (6, 9, 20)
+    if not n:
+        return True
+    for package in packages:
+        if n >= package and McNuggets(n - package):
+            return True
+    return False
