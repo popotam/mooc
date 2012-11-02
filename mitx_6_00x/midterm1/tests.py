@@ -27,3 +27,13 @@ def test_fixed_point():
     print "r2", r2
     assert r1 == -1.0
     assert r2 - 8 < epsilon
+
+
+def test_myLog():
+    from midterm1 import myLog
+    r1 = myLog(16, 2)
+    r2 = myLog(15, 3)
+    print "r1", r1
+    print "r2", r2
+    assert r1 == 4
+    assert r2 == 2

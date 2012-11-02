@@ -65,3 +65,16 @@ def babylon(a):
 
 def sqrt_ver2(a):
     return fixedPoint(babylon(a), 0.0001)
+
+
+def myLog(x, b):
+    '''
+    x: a positive integer
+    b: a positive integer
+
+    returns: log_b(x), or, the logarithm of x relative to a base b.
+    '''
+    guess = 0
+    while b ** (guess + 1) <= x:
+        guess += 1
+    return guess
