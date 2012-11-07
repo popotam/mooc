@@ -6,7 +6,6 @@
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
-import mdp
 import util
 
 from learningAgents import ValueEstimationAgent
@@ -37,8 +36,17 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.discount = discount
         self.iterations = iterations
         self.values = util.Counter()  # A Counter is a dict with default 0
+        for _ in xrange(self.iterations):
+            self.value_iteration()
 
-        "*** YOUR CODE HERE ***"
+    def value_iteration(self):
+        self.values = util.Counter(
+            (state, max(
+                self.getQValue(state, action)
+                for action in self.mdp.getPossibleActions(state)
+            ) if self.mdp.getPossibleActions(state) else 0)
+            for state in self.mdp.getStates()
+        )
 
     def getValue(self, state):
         """
@@ -54,8 +62,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           necessarily create this quantity and you may have
           to derive it on the fly.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        qvalue = sum(prob * (self.mdp.getReward(state, action, next_state)
+                            + self.discount * self.values[next_state])
+                    for next_state, prob
+                    in self.mdp.getTransitionStatesAndProbs(state, action))
+        return qvalue
 
     def getPolicy(self, state):
         """
@@ -65,8 +76,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = self.mdp.getPossibleActions(state)
+        if not actions:
+            return None
+        return max((self.getQValue(state, action), action)
+                   for action in actions)[1]
 
     def getAction(self, state):
         "Returns the policy at the state (no exploration)."
