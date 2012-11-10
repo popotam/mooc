@@ -46,7 +46,40 @@ def process(url):
 
 # Problem 1
 
-# TODO: NewsStory
+
+class NewsStory(object):
+    def __init__(self, guid, title, subject, summary, link):
+        self.guid = guid
+        self.title = title
+        self.subject = subject
+        self.summary = summary
+        self.link = link
+
+    def getGuid(self):
+        return self.guid
+
+    get_guid = getGuid
+
+    def getTitle(self):
+        return self.title
+
+    get_title = getTitle
+
+    def getSubject(self):
+        return self.subject
+
+    get_subject = getSubject
+
+    def getSummary(self):
+        return self.summary
+
+    get_summary = getSummary
+
+    def getLink(self):
+        return self.link
+
+    get_link = getLink
+
 
 #======================
 # Part 2
@@ -65,25 +98,73 @@ class Trigger(object):
 # Whole Word Triggers
 # Problems 2-5
 
-# TODO: WordTrigger
 
-# TODO: TitleTrigger
-# TODO: SubjectTrigger
-# TODO: SummaryTrigger
+class WordTrigger(Trigger):
+    def __init__(self, word):
+        self.word = word
+
+    def isWordIn(self, text):
+        text = text.lower()
+        for mark in string.punctuation:
+            text = text.replace(mark, ' ')
+        words = text.split()
+        return self.word.lower() in words
+
+
+class TitleTrigger(WordTrigger):
+    def evaluate(self, story):
+        return self.isWordIn(story.getTitle())
+
+
+class SubjectTrigger(WordTrigger):
+    def evaluate(self, story):
+        return self.isWordIn(story.getSubject())
+
+
+class SummaryTrigger(WordTrigger):
+    def evaluate(self, story):
+        return self.isWordIn(story.getSummary())
 
 
 # Composite Triggers
 # Problems 6-8
 
-# TODO: NotTrigger
-# TODO: AndTrigger
-# TODO: OrTrigger
+class NotTrigger(Trigger):
+    def __init__(self, trigger):
+        self.trigger = trigger
+
+    def evaluate(self, story):
+        return not self.trigger.evaluate(story)
+
+
+class AndTrigger(Trigger):
+    def __init__(self, trigger1, trigger2):
+        self.trigger1 = trigger1
+        self.trigger2 = trigger2
+
+    def evaluate(self, story):
+        return self.trigger1.evaluate(story) and self.trigger2.evaluate(story)
+
+
+class OrTrigger(Trigger):
+    def __init__(self, trigger1, trigger2):
+        self.trigger1 = trigger1
+        self.trigger2 = trigger2
+
+    def evaluate(self, story):
+        return self.trigger1.evaluate(story) or self.trigger2.evaluate(story)
 
 
 # Phrase Trigger
 # Question 9
 
-# TODO: PhraseTrigger
+class PhraseTrigger(Trigger):
+    def __init__(self, phrase):
+        self.phrase = phrase
+
+    def evaluate(self, story):
+        text = story.getTitle() + story.getSubject() + story.getSummary()
+        return self.phrase in text
 
 
 #======================
@@ -98,13 +179,14 @@ def filterStories(stories, triggerlist):
     Returns: a list of only the stories for which a trigger in triggerlist fires.
     """
     # TODO: Problem 10
-    # This is a placeholder (we're just returning all the stories, with no filtering)
-    return stories
+    return [story for story in stories
+            if any(trigger.evaluate(story) for trigger in triggerlist)]
 
 #======================
 # Part 4
 # User-Specified Triggers
 #======================
+
 
 def makeTrigger(triggerMap, triggerType, params, name):
     """
@@ -122,6 +204,15 @@ def makeTrigger(triggerMap, triggerType, params, name):
     Returns: None
     """
     # TODO: Problem 11
+    triggerMap[name] = {
+        'TITLE': TitleTrigger,
+        'SUBJECT': SubjectTrigger,
+        'SUMMARY': SummaryTrigger,
+        'NOT': lambda t: NotTrigger(triggerMap[t]),
+        'AND': lambda t1, t2: AndTrigger(triggerMap[t1], triggerMap[t2]),
+        'OR': lambda t1, t2: OrTrigger(triggerMap[t1], triggerMap[t2]),
+        'PHRASE': lambda *args: PhraseTrigger(" ".join(args)),
+    }[triggerType](*params)
 
 
 def readTriggerConfig(filename):
@@ -148,6 +239,7 @@ def readTriggerConfig(filename):
 
         # Making a new trigger
         if linesplit[0] != "ADD":
+            # print triggerMap, linesplit[1], linesplit[2:], linesplit[0]
             trigger = makeTrigger(triggerMap, linesplit[1],
                                   linesplit[2:], linesplit[0])
 
@@ -176,7 +268,7 @@ def main_thread(master):
 
         # TODO: Problem 11
         # After implementing makeTrigger, uncomment the line below:
-        # triggerlist = readTriggerConfig("triggers.txt")
+        triggerlist = readTriggerConfig("triggers.txt")
 
         # from here is about drawing
         frame = Frame(master)
