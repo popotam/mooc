@@ -204,7 +204,7 @@ def makeTrigger(triggerMap, triggerType, params, name):
     Returns: None
     """
     # TODO: Problem 11
-    triggerMap[name] = {
+    trigger = triggerMap[name] = {
         'TITLE': TitleTrigger,
         'SUBJECT': SubjectTrigger,
         'SUMMARY': SummaryTrigger,
@@ -213,6 +213,7 @@ def makeTrigger(triggerMap, triggerType, params, name):
         'OR': lambda t1, t2: OrTrigger(triggerMap[t1], triggerMap[t2]),
         'PHRASE': lambda *args: PhraseTrigger(" ".join(args)),
     }[triggerType](*params)
+    return trigger
 
 
 def readTriggerConfig(filename):
