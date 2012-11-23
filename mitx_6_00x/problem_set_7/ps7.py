@@ -258,7 +258,16 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     robot_type: class of robot to be instantiated (e.g. StandardRobot or
                 RandomWalkRobot)
     """
-    raise NotImplementedError
+    ticks = 0
+    for _ in xrange(num_trials):
+        room = RectangularRoom(width, height)
+        robots = [robot_type(room, speed) for _ in xrange(num_robots)]
+        while (float(room.getNumCleanedTiles()) / float(room.getNumTiles())
+               <= min_coverage):
+            for robot in robots:
+                robot.updatePositionAndClean()
+            ticks += 1
+    return float(ticks) / num_trials
 
 
 # === Problem 4
