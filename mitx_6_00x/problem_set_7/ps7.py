@@ -283,7 +283,13 @@ class RandomWalkRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        raise NotImplementedError
+        new_position = self.getRobotPosition().getNewPosition(
+                self.getRobotDirection(), self.speed)
+        if self.room.isPositionInRoom(new_position):
+            self.setRobotPosition(new_position)
+            self.room.cleanTileAtPosition(new_position)
+        self.setRobotDirection(random.random() * 360.0)
+        return self.getRobotPosition()
 
 
 # === Problem 5
