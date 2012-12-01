@@ -40,7 +40,7 @@ void main (void)
         // A key part is implementation of the fragment shader
 
         // Color all pixels blue for now, remove this in your implementation!
-        finalcolor = vec4(0,0,1,1); 
+        finalcolor = ambient + emission;//vec4(0,0,1,1); 
 
         gl_FragColor = finalcolor; 
     } else {
