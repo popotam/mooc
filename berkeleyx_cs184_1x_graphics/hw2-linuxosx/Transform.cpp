@@ -63,8 +63,8 @@ mat4 Transform::perspective(float fovy, float aspect, float zNear, float zFar)
 {
   float top = zNear * tan(fovy * M_PI / 360.0);
   float right = top * aspect;
-  return frustum(-right, right, -top, top, zNear, zFar);
-
+  mat4 dest = frustum(-right, right, -top, top, zNear, zFar);
+  return dest;
 }
 
 mat4 Transform::frustum(

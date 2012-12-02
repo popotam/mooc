@@ -101,8 +101,15 @@ void readfile(const char* filename)
                             // YOUR CODE FOR HW 2 HERE. 
                             // Note that values[0...7] shows the read in values 
                             // Make use of lightposn[] and lightcolor[] arrays in variables.h
-                            // Those arrays can then be used in display too.  
-
+                            // Those arrays can then be used in display too.
+                        	lightposn[4 * numused] = values[0];
+                        	lightposn[4 * numused + 1] = values[1];
+                        	lightposn[4 * numused + 2] = values[2];
+                        	lightposn[4 * numused + 3] = values[3];
+                        	lightcolor[4 * numused] = values[4];
+                        	lightcolor[4 * numused + 1] = values[5];
+                        	lightcolor[4 * numused + 2] = values[6];
+                        	lightcolor[4 * numused + 3] = values[7];
                             ++numused; 
                         }
                     }
@@ -160,7 +167,12 @@ void readfile(const char* filename)
                         // Use all of values[0...9]
                         // You may need to use the upvector fn in Transform.cpp
                         // to set up correctly. 
-                        // Set eyeinit upinit center fovy in variables.h 
+                        // Set eyeinit upinit center fovy in variables.h
+                    	// Inputs:
+                    	// lookfromx lookfromy lookfromz
+                    	// lookatx lookaty lookatz
+                    	// upx upy upz fovy
+
 
                     }
                 }
@@ -210,6 +222,8 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file. 
                         // Also keep in mind what order your matrix is!
+                    	transfstack.push(
+                    			Transform::translate(values[0], values[1], values[2]));
 
                     }
                 }
@@ -221,11 +235,13 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file.  
                         // Also keep in mind what order your matrix is!
+                    	transfstack.push(
+                    			Transform::scale(values[0], values[1], values[2]));
 
                     }
                 }
                 else if (cmd == "rotate") {
-                    validinput = readvals(s,4,values); 
+                	validinput = readvals(s,4,values);
                     if (validinput) {
 
                         // YOUR CODE FOR HW 2 HERE. 
@@ -234,6 +250,14 @@ void readfile(const char* filename)
                         // See how the stack is affected, as above.  
                         // Note that rotate returns a mat3. 
                         // Also keep in mind what order your matrix is!
+                    	//printf("rotate(%.2f, %.2f, %.2f, %.2f)\n",
+                    	//	    values[0], values[1], values[2], values[3]);
+
+                    	vec3 rot_axis = glm::normalize(vec3(values[0], values[1], values[2]));
+                    	mat4 rotation = mat4(Transform::rotate(values[3], rot_axis));
+
+                    	//printMat4(rotation, "rotation matrix: ");
+                    	transfstack.push(rotation);
 
                     }
                 }

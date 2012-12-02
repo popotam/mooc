@@ -18,6 +18,7 @@
 using namespace std ; 
 #include "variables.h"
 #include "readfile.h"
+#include "utils.h"
 
 // New helper transformation function to transform vector by modelview 
 // May be better done using newer glm functionality.
@@ -68,10 +69,28 @@ void display()
         // You need to pass the light positions and colors to the shader. 
         // glUniform4fv() and similar functions will be useful. See FAQ for help with these functions.
         // The lightransf[] array in variables.h and transformvec() might also be useful here.
-        // Remember that light positions must be transformed by modelview.  
+        // Remember that light positions must be transformed by modelview.
+        for (int i = 0 ; i < numused ; i++) {
+        	transformvec(&lightposn[4 * i], &lightransf[4 * i]);
+        }
+        glUniform4fv(lightpos, numLights, lightransf);
+        glUniform4fv(lightcol, numLights, lightcolor);
+        glUniform1i(numusedcol, numused);
 
     } else {
         glUniform1i(enablelighting,false); 
+    }
+    for (int i = 0; i < numused; i++) {
+    	printf("LIGHT #%i\n", i);
+    	printf("Position:    %.2f, %.2f, %.2f, %.2f\n",
+    			lightposn[4 * i], lightposn[4 * i + 1],
+    			lightposn[4 * i + 2], lightposn[4 * i + 3]);
+    	printf("Transformed: %.2f, %.2f, %.2f, %.2f\n",
+    			lightransf[4 * i], lightransf[4 * i + 1],
+    			lightransf[4 * i + 2], lightransf[4 * i + 3]);
+    	printf("Color:       %.2f, %.2f, %.2f, %.2f\n",
+    			lightcolor[4 * i], lightcolor[4 * i + 1],
+    			lightcolor[4 * i + 2], lightcolor[4 * i + 3]);
     }
 
     // Transformations for objects, involving translation and scaling 
@@ -82,9 +101,11 @@ void display()
     // YOUR CODE FOR HW 2 HERE.  
     // You need to use scale, translate and modelview to 
     // set up the net transformation matrix for the objects.  
-    // Account for GLM issues, matrix order (!!), etc.  
+    // Account for GLM issues, matrix order (!!), etc.
+    transf = glm::transpose(glm::transpose(mv) * sc * tr);
+    //printMat4(transf, "scale/translate:");
 
-    glLoadMatrixf(&transf[0][0]); 
+    glLoadMatrixf(&transf[0][0]);
 
     for (int i = 0 ; i < numobjects ; i++) {
         object* obj = &(objects[i]); // Grabs an object struct.

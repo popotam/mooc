@@ -34,17 +34,22 @@ void reshape(int width, int height)
 {
     w = width;
     h = height;
+    mat4 glm_mv;
+    mat4 my_mv;
     mat4 mv; // just like for lookat
 
     glMatrixMode(GL_PROJECTION);
     float aspect = w / (float) h, zNear = 0.1, zFar = 99.0;
 
     // I am changing the projection stuff to be consistent with lookAt
+    glm_mv = glm::perspective(fovy,aspect,zNear,zFar);
+    my_mv = Transform::perspective(fovy,aspect,zNear,zFar);
+    my_mv = glm::transpose(my_mv); // accounting for row major
+
     if (useGlu) {
-        mv = glm::perspective(fovy,aspect,zNear,zFar); 
+        mv = glm_mv;
     } else {
-        mv = Transform::perspective(fovy,aspect,zNear,zFar); 
-        mv = glm::transpose(mv); // accounting for row major 
+    	mv = my_mv;
     }
 
     glLoadMatrixf(&mv[0][0]); 
@@ -58,7 +63,8 @@ void saveScreenshot(string fname)
     glReadBuffer(GL_FRONT);
     glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE, pixels);
 
-    FIBITMAP *img = FreeImage_ConvertFromRawBits(pixels, w, h, w * 3, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
+    FIBITMAP *img = FreeImage_ConvertFromRawBits(
+    		pixels, w, h, w * 3, 24, 0xFF0000, 0x00FF00, 0x0000FF, false);
 
     std::cout << "Saving screenshot: " << fname << "\n";
 

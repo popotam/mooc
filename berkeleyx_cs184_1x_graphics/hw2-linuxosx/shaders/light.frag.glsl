@@ -31,6 +31,18 @@ uniform vec4 specular;
 uniform vec4 emission; 
 uniform float shininess; 
 
+vec4 ComputeLight (const in vec3 direction, const in vec4 lightcolor, const in vec3 normal, const in vec3 halfvec, const in vec4 mydiffuse, const in vec4 myspecular, const in float myshininess) {
+
+    float nDotL = dot(normal, direction)  ;         
+    vec4 lambert = mydiffuse * lightcolor * max (nDotL, 0.0) ;  
+
+    float nDotH = dot(normal, halfvec) ; 
+    vec4 phong = myspecular * lightcolor * pow (max(nDotH, 0.0), myshininess) ; 
+
+    vec4 retval = lambert + phong ; 
+    return retval ;            
+}
+
 void main (void) 
 {       
     if (enablelighting) {       
@@ -38,6 +50,47 @@ void main (void)
 
         // YOUR CODE FOR HW 2 HERE
         // A key part is implementation of the fragment shader
+
+
+
+        // They eye is always at (0,0,0) looking down -z axis 
+        // Also compute current fragment position and direction to eye 
+
+        const vec3 eyepos = vec3(0,0,0) ; 
+        vec4 _mypos = gl_ModelViewMatrix * myvertex ; 
+        vec3 mypos = _mypos.xyz / _mypos.w ; // Dehomogenize current location 
+        vec3 eyedirn = normalize(eyepos - mypos) ; 
+
+        // Compute normal, needed for shading. 
+        // Simpler is vec3 normal = normalize(gl_NormalMatrix * mynormal) ; 
+        vec3 _normal = (gl_ModelViewMatrixInverseTranspose*vec4(mynormal,0.0)).xyz ; 
+        vec3 normal = normalize(_normal) ;
+        
+        finalcolor = ambient;
+
+        for (int i = 0 ; i < numused ; i++) { 
+            vec4 light_color;
+            vec3 light_half;
+            vec3 light_direction;
+            vec4 light_position = vec4(lightposn[i]);
+            
+            if (light_position.w == 0) {
+                light_direction = normalize(light_position.xyz);
+            } else {
+                light_direction = normalize(
+                        (light_position.xyz / light_position.w) - mypos);
+            }
+            light_half = normalize (light_direction + eyedirn) ; 
+            light_color = ComputeLight(
+                    light_direction, lightcolor[i], normal,
+                    light_half, diffuse, specular, shininess) ;
+            
+            finalcolor += light_color;
+        }
+
+        gl_FragColor = finalcolor ; 
+
+
 
         // Color all pixels blue for now, remove this in your implementation!
         finalcolor = ambient + emission;//vec4(0,0,1,1); 
