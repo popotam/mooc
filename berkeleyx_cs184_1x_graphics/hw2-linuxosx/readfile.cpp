@@ -179,7 +179,7 @@ void readfile(const char* filename)
                         // vec3 upinit ;
                         // vec3 center ;
 
-                        eyeinit = vec3(values[0], values[1], values[2])
+                        eyeinit = vec3(values[0], values[1], values[2]);
                         center = vec3(values[3], values[4], values[5]);
                         upinit = glm::normalize(vec3(values[6], values[7], values[8]));
                         fovy = values[9];
@@ -232,9 +232,10 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file. 
                         // Also keep in mind what order your matrix is!
-                    	transfstack.push(
-                    			transfstack.top() *
-                    			Transform::translate(values[0], values[1], values[2]));
+                    	mat4 translate = transfstack.top() *
+                    			Transform::translate(values[0], values[1], values[2]);
+                    	transfstack.pop();
+                    	transfstack.push(translate);
 
                     }
                 }
@@ -246,9 +247,11 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file.  
                         // Also keep in mind what order your matrix is!
-                    	transfstack.push(
-                    			transfstack.top() *
-                    			Transform::scale(values[0], values[1], values[2]));
+                    	mat4 scale = transfstack.top() *
+                    			Transform::scale(values[0], values[1], values[2]);
+                    	transfstack.pop();
+                    	transfstack.push(scale);
+
 
                     }
                 }
@@ -266,10 +269,11 @@ void readfile(const char* filename)
                     	//	    values[0], values[1], values[2], values[3]);
 
                     	vec3 rot_axis = glm::normalize(vec3(values[0], values[1], values[2]));
-                    	mat4 rotation = mat4(Transform::rotate(values[3], rot_axis));
+                    	mat4 rotation = transfstack.top() * mat4(Transform::rotate(values[3], rot_axis));
 
                     	//printMat4(rotation, "rotation matrix: ");
-                    	transfstack.push(transfstack.top() * rotation);
+                    	transfstack.pop();
+                    	transfstack.push(rotation);
 
                     }
                 }
