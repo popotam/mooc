@@ -102,7 +102,7 @@ void display()
     // You need to use scale, translate and modelview to 
     // set up the net transformation matrix for the objects.  
     // Account for GLM issues, matrix order (!!), etc.
-    transf = glm::transpose(glm::transpose(mv) * sc * tr);
+    transf = glm::transpose(sc * tr * glm::transpose(mv));
     //printMat4(transf, "scale/translate:");
 
     glLoadMatrixf(&transf[0][0]);
