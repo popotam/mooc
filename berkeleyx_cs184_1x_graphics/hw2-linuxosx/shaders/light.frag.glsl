@@ -31,7 +31,13 @@ uniform vec4 specular;
 uniform vec4 emission; 
 uniform float shininess; 
 
-vec4 ComputeLight (const in vec3 direction, const in vec4 lightcolor, const in vec3 normal, const in vec3 halfvec, const in vec4 mydiffuse, const in vec4 myspecular, const in float myshininess) {
+vec4 ComputeLight (const in vec3 direction,
+                   const in vec4 lightcolor,
+                   const in vec3 normal,
+                   const in vec3 halfvec,
+                   const in vec4 mydiffuse,
+                   const in vec4 myspecular,
+                   const in float myshininess) {
 
     float nDotL = dot(normal, direction)  ;         
     vec4 lambert = mydiffuse * lightcolor * max (nDotL, 0.0) ;  
@@ -50,8 +56,6 @@ void main (void)
 
         // YOUR CODE FOR HW 2 HERE
         // A key part is implementation of the fragment shader
-
-
 
         // They eye is always at (0,0,0) looking down -z axis 
         // Also compute current fragment position and direction to eye 
@@ -72,9 +76,9 @@ void main (void)
             vec4 light_color;
             vec3 light_half;
             vec3 light_direction;
-            vec4 light_position = vec4(lightposn[i]);
+            vec4 light_position = lightposn[i];
             
-            if (light_position.w == 0) {
+            if (light_position.w == 0.0) {
                 light_direction = normalize(light_position.xyz);
             } else {
                 light_direction = normalize(
@@ -87,14 +91,6 @@ void main (void)
             
             finalcolor += light_color;
         }
-
-        gl_FragColor = finalcolor ; 
-
-
-
-        // Color all pixels blue for now, remove this in your implementation!
-        finalcolor = ambient + emission;//vec4(0,0,1,1); 
-
         gl_FragColor = finalcolor; 
     } else {
         gl_FragColor = color; 

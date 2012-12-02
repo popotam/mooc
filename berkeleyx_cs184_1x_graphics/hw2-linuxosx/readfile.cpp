@@ -98,7 +98,7 @@ void readfile(const char* filename)
                         validinput = readvals(s, 8, values); // Position/color for lts.
                         if (validinput) {
 
-                            // YOUR CODE FOR HW 2 HERE. 
+                            // YOUR CODE FOR HW 2 HERE. [DONE]
                             // Note that values[0...7] shows the read in values 
                             // Make use of lightposn[] and lightcolor[] arrays in variables.h
                             // Those arrays can then be used in display too.
@@ -223,6 +223,7 @@ void readfile(const char* filename)
                         // You might want to use helper functions on top of file. 
                         // Also keep in mind what order your matrix is!
                     	transfstack.push(
+                    			transfstack.top() *
                     			Transform::translate(values[0], values[1], values[2]));
 
                     }
@@ -236,6 +237,7 @@ void readfile(const char* filename)
                         // You might want to use helper functions on top of file.  
                         // Also keep in mind what order your matrix is!
                     	transfstack.push(
+                    			transfstack.top() *
                     			Transform::scale(values[0], values[1], values[2]));
 
                     }
@@ -257,7 +259,7 @@ void readfile(const char* filename)
                     	mat4 rotation = mat4(Transform::rotate(values[3], rot_axis));
 
                     	//printMat4(rotation, "rotation matrix: ");
-                    	transfstack.push(rotation);
+                    	transfstack.push(transfstack.top() * rotation);
 
                     }
                 }

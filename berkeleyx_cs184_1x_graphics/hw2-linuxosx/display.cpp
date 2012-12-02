@@ -65,7 +65,7 @@ void display()
     if (numused) {
         glUniform1i(enablelighting,true);
 
-        // YOUR CODE FOR HW 2 HERE.  
+        // YOUR CODE FOR HW 2 HERE. [DONE]
         // You need to pass the light positions and colors to the shader. 
         // glUniform4fv() and similar functions will be useful. See FAQ for help with these functions.
         // The lightransf[] array in variables.h and transformvec() might also be useful here.
@@ -98,7 +98,7 @@ void display()
     sc = Transform::scale(sx,sy,1.0); 
     tr = Transform::translate(tx,ty,0.0); 
 
-    // YOUR CODE FOR HW 2 HERE.  
+    // YOUR CODE FOR HW 2 HERE. [DONE]
     // You need to use scale, translate and modelview to 
     // set up the net transformation matrix for the objects.  
     // Account for GLM issues, matrix order (!!), etc.
@@ -110,10 +110,18 @@ void display()
     for (int i = 0 ; i < numobjects ; i++) {
         object* obj = &(objects[i]); // Grabs an object struct.
 
-        // YOUR CODE FOR HW 2 HERE. 
+        // YOUR CODE FOR HW 2 HERE. [DONE]
         // Set up the object transformations 
         // And pass in the appropriate material properties
         // Again glUniform() related functions will be useful
+
+        mat4 object_transform = transf * glm::transpose(obj->transform);
+        glLoadMatrixf(&object_transform[0][0]);
+        glUniform4fv(ambientcol, 1, obj->ambient);
+        glUniform4fv(diffusecol, 1, obj->diffuse);
+        glUniform4fv(specularcol, 1, obj->specular);
+        glUniform4fv(emissioncol, 1, obj->emission);
+        glUniform1f(shininesscol, obj->shininess);
 
         // Actually draw the object
         // We provide the actual glut drawing functions for you.  
