@@ -54,7 +54,7 @@ void main (void)
     if (enablelighting) {       
         vec4 finalcolor; 
 
-        // YOUR CODE FOR HW 2 HERE
+        // YOUR CODE FOR HW 2 HERE [DONE]
         // A key part is implementation of the fragment shader
 
         // They eye is always at (0,0,0) looking down -z axis 

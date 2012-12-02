@@ -168,11 +168,21 @@ void readfile(const char* filename)
                         // You may need to use the upvector fn in Transform.cpp
                         // to set up correctly. 
                         // Set eyeinit upinit center fovy in variables.h
-                    	// Inputs:
-                    	// lookfromx lookfromy lookfromz
-                    	// lookatx lookaty lookatz
-                    	// upx upy upz fovy
 
+                        // Inputs:
+                        // lookfromx lookfromy lookfromz
+                        // lookatx lookaty lookatz
+                        // upx upy upz fovy
+
+                        // Outputs:
+                        // vec3 eyeinit ;
+                        // vec3 upinit ;
+                        // vec3 center ;
+
+                        eyeinit = vec3(values[0], values[1], values[2])
+                        center = vec3(values[3], values[4], values[5]);
+                        upinit = glm::normalize(vec3(values[6], values[7], values[8]));
+                        fovy = values[9];
 
                     }
                 }
