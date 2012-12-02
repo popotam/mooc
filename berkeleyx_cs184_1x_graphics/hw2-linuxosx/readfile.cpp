@@ -232,8 +232,8 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file. 
                         // Also keep in mind what order your matrix is!
-                    	mat4 translate = transfstack.top() *
-                    			Transform::translate(values[0], values[1], values[2]);
+                    	mat4 translate =
+                    			Transform::translate(values[0], values[1], values[2]) * transfstack.top();
                     	transfstack.pop();
                     	transfstack.push(translate);
 
@@ -247,8 +247,8 @@ void readfile(const char* filename)
                         // Think about how the transformation stack is affected
                         // You might want to use helper functions on top of file.  
                         // Also keep in mind what order your matrix is!
-                    	mat4 scale = transfstack.top() *
-                    			Transform::scale(values[0], values[1], values[2]);
+                    	mat4 scale =
+                    			Transform::scale(values[0], values[1], values[2]) * transfstack.top();
                     	transfstack.pop();
                     	transfstack.push(scale);
 
@@ -269,7 +269,7 @@ void readfile(const char* filename)
                     	//	    values[0], values[1], values[2], values[3]);
 
                     	vec3 rot_axis = glm::normalize(vec3(values[0], values[1], values[2]));
-                    	mat4 rotation = transfstack.top() * mat4(Transform::rotate(values[3], rot_axis));
+                    	mat4 rotation = mat4(Transform::rotate(values[3], rot_axis)) * transfstack.top();
 
                     	//printMat4(rotation, "rotation matrix: ");
                     	transfstack.pop();
