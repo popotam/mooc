@@ -37,20 +37,20 @@ class SimpleVirus(object):
         maxBirthProb: Maximum reproduction probability (a float between 0-1)
         clearProb: Maximum clearance probability (a float between 0-1).
         """
-
-        # TODO
+        self.maxBrithProb = maxBirthProb
+        self.clearProb = clearProb
 
     def getMaxBirthProb(self):
         """
         Returns the max birth probability.
         """
-        # TODO
+        return self.maxBrithProb
 
     def getClearProb(self):
         """
         Returns the clear probability.
         """
-        # TODO
+        return self.clearProb
 
     def doesClear(self):
         """Stochastically determines whether this virus particle is cleared
@@ -58,8 +58,7 @@ class SimpleVirus(object):
         returns: True with probability self.getClearProb and otherwise returns
         False.
         """
-
-        # TODO
+        return (random.random() <= self.getClearProb())
 
     def reproduce(self, popDensity):
         """
@@ -81,7 +80,9 @@ class SimpleVirus(object):
         NoChildException if this virus particle does not reproduce.
         """
 
-        # TODO
+        if (random.random() > self.getMaxBirthProb() * (1 - popDensity)):
+            raise NoChildException()
+        return SimpleVirus(self.getMaxBirthProb(), self.getClearProb())
 
 
 class Patient(object):
@@ -100,28 +101,27 @@ class Patient(object):
 
         maxPop: the maximum virus population for this patient (an integer)
         """
-
-        # TODO
+        self.viruses = viruses
+        self.maxPop = maxPop
 
     def getViruses(self):
         """
         Returns the viruses in this Patient.
         """
-        # TODO
+        return self.viruses
 
     def getMaxPop(self):
         """
         Returns the max population.
         """
-        # TODO
+        return self.maxPop
 
     def getTotalPop(self):
         """
         Gets the size of the current total virus population.
         returns: The total virus population (an integer)
         """
-
-        # TODO
+        return len(self.getViruses())
 
     def update(self):
         """
@@ -141,8 +141,20 @@ class Patient(object):
         returns: The total virus population at the end of the update (an
         integer)
         """
-
-        # TODO
+        # clear
+        self.viruses = [virus for virus in self.getViruses()
+                        if not virus.doesClear()]
+        # density
+        density = float(self.getTotalPop()) / self.getMaxPop()
+        # reproduce
+        offspring = []
+        for virus in self.getViruses():
+            try:
+                offspring.append(virus.reproduce(density))
+            except NoChildException:
+                pass
+        self.viruses += offspring
+        return self.getTotalPop()
 
 
 #
@@ -163,8 +175,27 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
     clearProb: Maximum clearance probability (a float between 0-1)
     numTrials: number of simulation runs to execute (an integer)
     """
+    population = [0] * 300
+    for _ in xrange(numTrials):
+        viruses = [SimpleVirus(maxBirthProb, clearProb)
+                   for _ in xrange(numViruses)]
+        patient = Patient(viruses, maxPop)
+        for step in xrange(300):
+            patient.update()
+            population[step] += patient.getTotalPop()
+    # calculate means
+    population = [cumul / float(numTrials) for cumul in population]
+    pylab.plot(range(300), population)
+    pylab.title("SimpleVirus simulatio")
+    pylab.xlabel("Time Steps")
+    pylab.ylabel("Average Virus Population")
+    pylab.legend(("Average Virus Population",))
+    pylab.show()
 
-    # TODO
+
+if __name__ == "__main__":
+    simulationWithoutDrug(numViruses=100, maxPop=1000, maxBirthProb=0.1,
+                          clearProb=0.05, numTrials=100)
 
 
 #
