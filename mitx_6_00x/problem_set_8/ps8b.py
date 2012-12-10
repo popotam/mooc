@@ -194,8 +194,9 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
 
 
 if __name__ == "__main__":
-    simulationWithoutDrug(numViruses=100, maxPop=1000, maxBirthProb=0.1,
-                          clearProb=0.05, numTrials=100)
+    # simulationWithoutDrug(numViruses=100, maxPop=1000, maxBirthProb=0.1,
+    #                       clearProb=0.05, numTrials=100)
+    pass
 
 
 #
@@ -422,5 +423,32 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb,
     numTrials: number of simulation runs to execute (an integer)
 
     """
+    total_pop = [0] * 300
+    guttagonol_pop = [0] * 300
+    for _ in xrange(numTrials):
+        viruses = [ResistantVirus(maxBirthProb, clearProb,
+                                  resistances, mutProb)
+                   for _ in xrange(numViruses)]
+        patient = TreatedPatient(viruses, maxPop)
+        for step in xrange(300):
+            if step == 150:
+                patient.addPrescription('guttagonol')
+            patient.update()
+            total_pop[step] += patient.getTotalPop()
+            guttagonol_pop[step] += patient.getResistPop(['guttagonol'])
+    # calculate means
+    total_pop = [cumul / float(numTrials) for cumul in total_pop]
+    guttagonol_pop = [cumul / float(numTrials) for cumul in guttagonol_pop]
+    pylab.plot(range(300), total_pop)
+    pylab.plot(range(300), guttagonol_pop)
+    pylab.title("ResistantVirus simulation")
+    pylab.xlabel("Time Steps")
+    pylab.ylabel("Average Virus Population")
+    pylab.legend(("All Viruses", "Viruses Resistant to Guttagonol"))
+    pylab.show()
 
-    # TODO
+
+if __name__ == "__main__":
+    simulationWithDrug(numViruses=100, maxPop=1000, maxBirthProb=0.1,
+                       clearProb=0.05, resistances={'guttagonol': False},
+                       mutProb=0.005, numTrials=100)
