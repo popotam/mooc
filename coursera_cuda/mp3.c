@@ -1,4 +1,4 @@
-// MP 2: Due Sunday, Dec 16, 2012 at 11:59 p.m. PST
+// MP 3: Due Sunday, Dec 30, 2012 at 11:59 p.m. PST
 #include    <wb.h>
 
 #define wbCheck(stmt) do {                                 \
@@ -10,11 +10,12 @@
     } while(0)
 
 // Compute C = A * B
-__global__ void matrixMultiply(float * A, float * B, float * C,
-			       int numARows, int numAColumns,
-			       int numBRows, int numBColumns,
-			       int numCRows, int numCColumns) {
+__global__ void matrixMultiplyShared(float * A, float * B, float * C,
+			             int numARows, int numAColumns,
+			             int numBRows, int numBColumns,
+			             int numCRows, int numCColumns) {
     //@@ Insert code to implement matrix multiplication here
+    //@@ You have to use shared memory for this MP
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int limit = ( ((numAColumns) < (numBRows)) ? (numAColumns) : (numBRows) );
@@ -82,7 +83,7 @@ int main(int argc, char ** argv) {
 
     wbTime_start(Compute, "Performing CUDA computation");
     //@@ Launch the GPU Kernel here
-    matrixMultiply<<<DimGrid,DimBlock>>>(
+    matrixMultiplyShared<<<DimGrid,DimBlock>>>(
             deviceA, deviceB, deviceC,
 		    numARows, numAColumns,
 			numBRows, numBColumns,
@@ -101,7 +102,6 @@ int main(int argc, char ** argv) {
     cudaFree(deviceA);
     cudaFree(deviceB);
     cudaFree(deviceC);
-
     wbTime_stop(GPU, "Freeing GPU Memory");
 
     wbSolution(args, hostC, numCRows, numCColumns);
@@ -112,4 +112,3 @@ int main(int argc, char ** argv) {
 
     return 0;
 }
-
