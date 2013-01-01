@@ -9,6 +9,8 @@
         }                                                  \
     } while(0)
 
+#define TILE_WIDTH 16
+
 // Compute C = A * B
 __global__ void matrixMultiplyShared(float * A, float * B, float * C,
 			             int numARows, int numAColumns,
@@ -16,14 +18,41 @@ __global__ void matrixMultiplyShared(float * A, float * B, float * C,
 			             int numCRows, int numCColumns) {
     //@@ Insert code to implement matrix multiplication here
     //@@ You have to use shared memory for this MP
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
+	__shared__ float sharedA[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float sharedB[TILE_WIDTH][TILE_WIDTH];
+
+	int bx = blockIdx.x;
+	int by = blockIdx.y;
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+    int row = by * TILE_WIDTH + ty;
+    int col = bx * TILE_WIDTH + tx;
     int limit = ( ((numAColumns) < (numBRows)) ? (numAColumns) : (numBRows) );
+
+	float value = 0.0;
+	for (int m = 0; m < ((limit -1) / TILE_WIDTH) + 1; m++) {
+		// load sharedA
+		if (row < numARows && (m * TILE_WIDTH + tx) < limit) {
+			sharedA[ty][tx] = A[row * numAColumns + (m * TILE_WIDTH + tx)];
+		} else {
+			sharedA[ty][tx] = 0;
+		}
+		// load sharedB
+		if ((m * TILE_WIDTH + ty) < limit && col < numBColumns) {
+			sharedB[ty][tx] = B[(m * TILE_WIDTH + ty) * numBColumns + col];
+		} else {
+			sharedB[ty][tx] = 0;
+		}
+		__syncthreads();
+	    if ((row < numCRows) && (col < numCColumns)) {
+			for (int k = 0; k < TILE_WIDTH; k++) {
+				value += sharedA[ty][k] * sharedB[k][tx];
+			}
+	    }
+		__syncthreads();
+	}
     if ((row < numCRows) && (col < numCColumns)) {
-        float value = 0.0;
-        for (int k = 0; k < limit; k++) {
-            value += A[row * numAColumns + k] * B[k * numBColumns + col];
-        }
         C[row * numCColumns + col] = value;
     }
 }
@@ -78,8 +107,8 @@ int main(int argc, char ** argv) {
     wbTime_stop(GPU, "Copying input memory to the GPU.");
 
     //@@ Initialize the grid and block dimensions here
-    dim3 DimGrid((numCColumns - 1) / 16 + 1, (numCRows - 1) / 16 + 1, 1);
-    dim3 DimBlock(16, 16, 1);
+    dim3 DimGrid((numCColumns - 1) / TILE_WIDTH + 1, (numCRows - 1) / TILE_WIDTH + 1, 1);
+    dim3 DimBlock(TILE_WIDTH, TILE_WIDTH, 1);
 
     wbTime_start(Compute, "Performing CUDA computation");
     //@@ Launch the GPU Kernel here
