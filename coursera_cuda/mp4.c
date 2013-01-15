@@ -19,7 +19,7 @@ __global__ void total(float * input, float * output, int len) {
     //@@ Insert code to implement vector addition here
 	__shared__ float partialSum[2 * BLOCK_SIZE];
 
-    unsigned int t = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int t = threadIdx.x;
     unsigned int start = 2 * blockIdx.x * blockDim.x;
 
     // load to shared
