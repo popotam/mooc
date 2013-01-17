@@ -59,7 +59,7 @@ int main(int argc, char ** argv) {
     wbTime_start(Compute, "Performing CUDA computation");
     //@@ Modify this to complete the functionality of the scan
     //@@ on the deivce
-    scan(deviceInput, deviceOutput, numElements);
+    scan<<<DimGrid,DimBlock>>>(deviceInput, deviceOutput, numElements);
 
     cudaDeviceSynchronize();
     wbTime_stop(Compute, "Performing CUDA computation");
