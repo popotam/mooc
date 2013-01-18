@@ -25,23 +25,38 @@ __global__ void scan(float * input, float * output, int len) {
 	unsigned int t = threadIdx.x;
 	unsigned int b = blockIdx.x;
     unsigned int start = 2 * b * BLOCK_SIZE;
+    unsigned int index;
+    unsigned int stride;
 
     // load to shared
     shared[t] = (start + t < len) ? input[start + t] : 0;
-    shared[blockDim.x + t] = (start + BLOCK_SIZE + t < len) ? input[start + BLOCK_SIZE + t] : 0;
-    __syncthreads()
+    shared[BLOCK_SIZE + t] = (start + BLOCK_SIZE + t < len) ? input[start + BLOCK_SIZE + t] : 0;
 
-    unsigned int stride = 1;
+    stride = 1;
     while (stride <= BLOCK_SIZE) {
-        int index = (t + 1) * stride * 2 - 1;
+        __syncthreads();
+        index = (t + 1) * stride * 2 - 1;
         if (index < 2 * BLOCK_SIZE) {
-            shared[index] = shared[index - stride];
+            shared[index] += shared[index - stride];
         }
         stride *= 2;
-        __syncthreads();
     }
 
-    //for (int stride = BLOCK_SIZE / 2; stride > 0; )
+    for (stride = BLOCK_SIZE / 2; stride >= 1; stride /= 2) {
+        __syncthreads();
+        index = (t + 1) * stride * 2 - 1;
+        if (index + stride < 2 * BLOCK_SIZE) {
+            shared[index + stride] += shared[index];
+        }
+    }
+
+    __syncthreads();
+    if (start + t < len) {
+        output[start + t] = shared[t];
+    }
+    if (start + BLOCK_SIZE + t < len) {
+        output[start + BLOCK_SIZE + t] = shared[BLOCK_SIZE + t];
+    }
 }
 
 int main(int argc, char ** argv) {
@@ -75,7 +90,7 @@ int main(int argc, char ** argv) {
     wbTime_stop(GPU, "Copying input memory to the GPU.");
 
     //@@ Initialize the grid and block dimensions here
-    dim3 DimGrid((numElements - 1) / BLOCK_SIZE + 1, 1, 1);
+    dim3 DimGrid((numElements - 1) / (2 * BLOCK_SIZE) + 1, 1, 1);
     dim3 DimBlock(BLOCK_SIZE, 1, 1);
 
     wbTime_start(Compute, "Performing CUDA computation");
