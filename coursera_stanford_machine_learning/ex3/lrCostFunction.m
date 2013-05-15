@@ -36,14 +36,16 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
+n = size(theta, 1);
+bad_eye = eye(n, n);
+bad_eye(1,1) = 0;
 
+hth = sigmoid(X * theta);  % vector
+J = (1 / m) * sum(-y .* log(hth) - (1 - y) .* log(1 - hth)) + (lambda / (2*m)) * sum(bad_eye * theta .^ 2);
 
-
-
-
-
-
-
+for i = 1:size(theta),
+    grad(i) = (1 / m) * sum((hth - y) .* X(:, i)) + (i > 1) * lambda * theta(i) / m;
+end
 
 % =============================================================
 
