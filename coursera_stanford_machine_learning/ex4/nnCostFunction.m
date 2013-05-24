@@ -74,8 +74,7 @@ J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) + ...
 D1 = zeros(size(Theta1));
 D2 = zeros(size(Theta2));
 
-num_sample = size(X, 1);
-for t = 1:num_sample,
+for t = 1:m,
 	a1 = [1 ; X(t, :)'];
 	z2 = Theta1 * a1;
 	a2 = sigmoid(z2);
@@ -90,16 +89,7 @@ for t = 1:num_sample,
 end
 
 Theta1_grad = (1 / m) * D1;
-%{
-"Size Theta1_grad"
-size(Theta1_grad)
-%}
 Theta2_grad = (1 / m) * D2;
-%{
-"Size Theta2_grad"
-size(Theta2_grad)
-%}
-
 
 % Part 3: Implement regularization with the cost function and gradients.
 %
@@ -109,9 +99,11 @@ size(Theta2_grad)
 %               and Theta2_grad from Part 2.
 %
 
+R1 = (1 / m) * lambda * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)];
+R2 = (1 / m) * lambda * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)];
 
-
-
+Theta1_grad = Theta1_grad .+ R1;
+Theta2_grad = Theta2_grad .+ R2;
 
 % -------------------------------------------------------------
 
