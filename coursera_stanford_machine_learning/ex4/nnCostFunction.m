@@ -62,13 +62,21 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+a1 = [ones(m, 1) X];
+a2 = sigmoid(a1 * Theta1');
+a2 = [ones(size(a2, 1), 1) a2];
+hth = a3 = sigmoid(a2 * Theta2');
 
+% n = size(theta, 1);
+% bad_eye = eye(n, n);
+% bad_eye(1,1) = 0;
 
+Y = y == 1:num_labels;
+J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) ;%+ (lambda / (2*m)) * sum(bad_eye * theta .^ 2);
 
-
-
-
-
+% for i = 1:size(theta),
+%     grad(i) = (1 / m) * sum((hth - y) .* X(:, i)) + (i > 1) * lambda * theta(i) / m;
+% end
 
 
 
