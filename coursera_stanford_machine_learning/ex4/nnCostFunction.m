@@ -39,6 +39,22 @@ Theta2_grad = zeros(size(Theta2));
 %         cost function computation is correct by verifying the cost
 %         computed in ex4.m
 %
+
+a1 = [ones(m, 1) X];
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(size(a2, 1), 1) a2];
+z3 = a2 * Theta2';
+hth = a3 = sigmoid(z3);
+
+warning ("off", "Octave:broadcast");
+Y = y == 1:num_labels;
+warning ("on", "Octave:broadcast");
+
+J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) + ...
+    (lambda / (2*m)) * sum([Theta1(:,2:end)(:) ; Theta2(:,2:end)(:)] .^ 2);
+
+
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
 %         the cost function with respect to Theta1 and Theta2 in Theta1_grad and
@@ -54,6 +70,44 @@ Theta2_grad = zeros(size(Theta2));
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
+
+%{
+"Size Theta1"
+size(Theta1)
+"Size Theta2"
+size(Theta2)
+"Size a1"
+size(a1)
+"Size a2"
+size(a2)
+"Size a3"
+size(a3)
+%}
+d3 = hth - Y;
+%{
+"Size d3"
+size(d3)
+%}
+d2 = d3 * Theta2 .* (a2 .* (1 - a2));
+d2 = d2(:,2:end);
+%{
+"Size d2"
+size(d2)
+%}
+
+Theta2_grad = (1 / m) * (a2(:,2:end)' * d3);
+Theta2_grad = [zeros(size(Theta2, 1), 1) Theta2_grad'];
+%{
+"Size Theta2_grad"
+size(Theta2_grad)
+%}
+Theta1_grad = (1 / m) * (a1(:,2:end)' * d2);
+Theta1_grad = [zeros(size(Theta1, 1), 1) Theta1_grad'];
+%{
+"Size Theta1_grad"
+size(Theta1_grad)
+%}
+
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
@@ -61,28 +115,6 @@ Theta2_grad = zeros(size(Theta2));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
-
-a1 = [ones(m, 1) X];
-a2 = sigmoid(a1 * Theta1');
-a2 = [ones(size(a2, 1), 1) a2];
-hth = a3 = sigmoid(a2 * Theta2');
-
-warning ("off", "Octave:broadcast");
-Y = y == 1:num_labels;
-warning ("on", "Octave:broadcast");
-
-J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) + ...
-    (lambda / (2*m)) * sum([Theta1(:,2:size(Theta1,2))(:) ; Theta2(:,2:size(Theta2,2))(:)] .^ 2);
-
-% for i = 1:size(theta),
-%     grad(i) = (1 / m) * sum((hth - y) .* X(:, i)) + (i > 1) * lambda * theta(i) / m;
-% end
-
-
-
-
-
-
 
 
 
