@@ -71,42 +71,35 @@ J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) + ...
 %               first time.
 %
 
-%{
-"Size Theta1"
-size(Theta1)
-"Size Theta2"
-size(Theta2)
-"Size a1"
-size(a1)
-"Size a2"
-size(a2)
-"Size a3"
-size(a3)
-%}
-d3 = hth - Y;
-%{
-"Size d3"
-size(d3)
-%}
-d2 = d3 * Theta2 .* (a2 .* (1 - a2));
-d2 = d2(:,2:end);
-%{
-"Size d2"
-size(d2)
-%}
+D1 = zeros(size(Theta1));
+D2 = zeros(size(Theta2));
 
-Theta2_grad = (1 / m) * (a2(:,2:end)' * d3);
-Theta2_grad = [zeros(size(Theta2, 1), 1) Theta2_grad'];
-%{
-"Size Theta2_grad"
-size(Theta2_grad)
-%}
-Theta1_grad = (1 / m) * (a1(:,2:end)' * d2);
-Theta1_grad = [zeros(size(Theta1, 1), 1) Theta1_grad'];
+num_sample = size(X, 1);
+for t = 1:num_sample,
+	a1 = [1 ; X(t, :)'];
+	z2 = Theta1 * a1;
+	a2 = sigmoid(z2);
+	a2 = [1 ; a2];
+	z3 = Theta2 * a2;
+	a3 = sigmoid(z3);
+	d3 = a3 - (y(t) == 1:num_labels)';
+	d2 = Theta2' * d3 .* (a2 .* (1 - a2));
+	d2 = d2(2:end);
+	D1 = D1 + d2 * a1';
+	D2 = D2 + d3 * a2';
+end
+
+Theta1_grad = (1 / m) * D1;
 %{
 "Size Theta1_grad"
 size(Theta1_grad)
 %}
+Theta2_grad = (1 / m) * D2;
+%{
+"Size Theta2_grad"
+size(Theta2_grad)
+%}
+
 
 % Part 3: Implement regularization with the cost function and gradients.
 %
