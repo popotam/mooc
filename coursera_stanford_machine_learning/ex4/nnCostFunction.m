@@ -67,12 +67,12 @@ a2 = sigmoid(a1 * Theta1');
 a2 = [ones(size(a2, 1), 1) a2];
 hth = a3 = sigmoid(a2 * Theta2');
 
-% n = size(theta, 1);
-% bad_eye = eye(n, n);
-% bad_eye(1,1) = 0;
-
+warning ("off", "Octave:broadcast");
 Y = y == 1:num_labels;
-J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) ;%+ (lambda / (2*m)) * sum(bad_eye * theta .^ 2);
+warning ("on", "Octave:broadcast");
+
+J = (1 / m) * sum(sum(-Y .* log(hth) - (1 - Y) .* log(1 - hth))) + ...
+    (lambda / (2*m)) * sum([Theta1(:,2:size(Theta1,2))(:) ; Theta2(:,2:size(Theta2,2))(:)] .^ 2);
 
 % for i = 1:size(theta),
 %     grad(i) = (1 / m) * sum((hth - y) .* X(:, i)) + (i > 1) * lambda * theta(i) / m;
