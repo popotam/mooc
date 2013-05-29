@@ -26,7 +26,7 @@ hth = X * theta;
 J = (1 / (2 * m)) * sum((hth - y) .^ 2) ...
 	+ (lambda / (2 * m)) * sum((1:n > 1) * (theta .^ 2));
 
-for i = 1:size(theta),
+for i = 1:n,
     grad(i) = (1 / m) * sum((hth - y) .* X(:, i)) + (i > 1) * (lambda / m) * theta(i);
 end
 
