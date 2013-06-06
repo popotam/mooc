@@ -23,11 +23,38 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
+params = [0.01; 0.03; 0.1; 0.3; 1; 3; 10; 30];
+
+performance = zeros(length(params), length(params));
 
 
+for costIndex = 1:length(params),
+	for sigmaIndex = 1:length(params),
+		C = params(costIndex);
+		sigma = params(sigmaIndex);
+		model = svmTrain(X, y, C, @(x1, x2) gaussianKernel(x1, x2, sigma));
+		predictions = svmPredict(model, Xval);
+		performance(costIndex, sigmaIndex) = mean(double(predictions == yval));
 
+		sleep(5);
+	end
+end
 
+performance
 
+[bestCosts, bestCostIndices] = max(performance);
+[_, bestSigmaIndex] = max(bestCosts);
+bestCostIndex = bestCostIndices(bestSigmaIndex);
+
+[bestCostIndex bestSigmaIndex]
+
+C = params(bestCostIndex);
+sigma = params(bestSigmaIndex);
+
+'C'
+C
+'sigma'
+sigma
 
 % =========================================================================
 
