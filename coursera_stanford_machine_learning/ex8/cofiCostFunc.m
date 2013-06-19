@@ -42,7 +42,9 @@ Theta_grad = zeros(size(Theta));
 
 predictions = R .* (X * Theta' - Y);  % movies x users
 
-J = (1/2) * sum(sum(predictions .^ 2));
+J = (1/2) * sum(sum(predictions .^ 2)) ...
+	+ (lambda/2) * sum(sum(Theta .^ 2)) ...
+	+ (lambda/2) * sum(sum(X .^ 2));
 
 for i = 1:num_movies,
 	for k = 1:num_features,
@@ -52,6 +54,9 @@ for i = 1:num_movies,
 		end
 	end
 end
+
+X_grad = X_grad .+ lambda * X;
+Theta_grad = Theta_grad .+ lambda * Theta;
 
 % =============================================================
 
