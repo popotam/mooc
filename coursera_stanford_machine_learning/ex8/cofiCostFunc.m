@@ -40,20 +40,18 @@ Theta_grad = zeros(size(Theta));
 %                     partial derivatives w.r.t. to each element of Theta
 %
 
+predictions = R .* (X * Theta' - Y);  % movies x users
 
+J = (1/2) * sum(sum(predictions .^ 2));
 
-
-
-
-
-
-
-
-
-
-
-
-
+for i = 1:num_movies,
+	for k = 1:num_features,
+		for j = 1:num_users,
+			X_grad(i,k) += predictions(i,j) * Theta(j,k);
+			Theta_grad(j,k) += predictions(i,j) * X(i,k);
+		end
+	end
+end
 
 % =============================================================
 
