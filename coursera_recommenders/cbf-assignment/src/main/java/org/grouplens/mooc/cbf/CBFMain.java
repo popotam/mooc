@@ -97,7 +97,7 @@ public class CBFMain {
 
         // use the TF-IDF scorer you will implement to score items
         config.bind(ItemScorer.class)
-              .to(TFIDFItemScorer.class);
+              .to(WeightedTFIDFItemScorer.class);
         return config;
     }
 }
