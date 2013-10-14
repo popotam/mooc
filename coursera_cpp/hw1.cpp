@@ -12,7 +12,7 @@
 
 using namespace std;
 
-// number of consecutive ints that will be summed
+// number of consecutive natural numbers that will be summed
 const int N = 40;
 
 
@@ -25,13 +25,14 @@ template<class Summable>
 inline Summable sum(vector<Summable> summed)
 {
   Summable result = 0;
+  // iterate through the vector and add each element to the result
   for (vector<int>::iterator it = summed.begin(); it != summed.end(); ++it)
     result += *it;
   return result;
 }
 
 
-// Controls operation of the program
+// Calculates a sum of N consecutive natural numbers and prints it out
 int main(void)
 {
   // prepare a vector with N consecutive natural numbers
