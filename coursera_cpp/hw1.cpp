@@ -21,13 +21,12 @@ const int N = 40;
 // @class Summable Any type that provides reasonable addition operation
 // @param summed A vector of Summable
 // @returns The sum of vector contents
-template<class Summable>
+template<typename Summable>
 inline Summable sum(vector<Summable> summed)
 {
   Summable result = 0;
   // iterate through the vector and add each element to the result
-  for (typename vector<Summable>::iterator
-       it = summed.begin(); it != summed.end(); ++it)
+  for (auto it = summed.cbegin(); it != summed.cend(); ++it)
     result += *it;
   return result;
 }
