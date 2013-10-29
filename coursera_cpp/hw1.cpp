@@ -26,7 +26,8 @@ inline Summable sum(vector<Summable> summed)
 {
   Summable result = 0;
   // iterate through the vector and add each element to the result
-  for (vector<int>::iterator it = summed.begin(); it != summed.end(); ++it)
+  for (typename vector<Summable>::iterator
+       it = summed.begin(); it != summed.end(); ++it)
     result += *it;
   return result;
 }
