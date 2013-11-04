@@ -4,6 +4,9 @@
 // on undirected random graphs.
 // Average shortest paths are calculated
 // for two 50-node graphs with edge density = 0.2 and 0.4
+//
+// The program uses C++11 features.
+// Please, compile it with the -std=c++0x or -std=c++11 flag
 
 #include <iostream>
 #include <limits>
