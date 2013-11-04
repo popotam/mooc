@@ -1,0 +1,207 @@
+Creating graph with 50 vertices
+Generating edges for graph with density=0.2
+Generated 229 edges
+Calculating path from 0 to 1
+Cost = 11.4821
+Calculating path from 1 to 2
+Cost = 10.864
+Calculating path from 2 to 3
+Cost = 10.6806
+Calculating path from 3 to 4
+Cost = 4.78344
+Calculating path from 4 to 5
+Cost = 8.50666
+Calculating path from 5 to 6
+Cost = 7.91146
+Calculating path from 6 to 7
+Cost = 11.3541
+Calculating path from 7 to 8
+Cost = 7.7377
+Calculating path from 8 to 9
+Cost = 2.89571
+Calculating path from 9 to 10
+Cost = 7.87338
+Calculating path from 10 to 11
+Cost = 4.20233
+Calculating path from 11 to 12
+Cost = 6.12275
+Calculating path from 12 to 13
+Cost = 4.85724
+Calculating path from 13 to 14
+Cost = 3.81632
+Calculating path from 14 to 15
+Cost = 10.135
+Calculating path from 15 to 16
+Cost = 10.3887
+Calculating path from 16 to 17
+Cost = 7.80539
+Calculating path from 17 to 18
+Cost = 7.83698
+Calculating path from 18 to 19
+Cost = 3.9146
+Calculating path from 19 to 20
+Cost = 12.7398
+Calculating path from 20 to 21
+Cost = 6.81303
+Calculating path from 21 to 22
+Cost = 6.1549
+Calculating path from 22 to 23
+Cost = 4.67137
+Calculating path from 23 to 24
+Cost = 12.9823
+Calculating path from 24 to 25
+Cost = 3.85512
+Calculating path from 25 to 26
+Cost = 8.31213
+Calculating path from 26 to 27
+Cost = 9.69005
+Calculating path from 27 to 28
+Cost = 7.92899
+Calculating path from 28 to 29
+Cost = 5.95436
+Calculating path from 29 to 30
+Cost = 2.60971
+Calculating path from 30 to 31
+Cost = 7.71664
+Calculating path from 31 to 32
+Cost = 10.9998
+Calculating path from 32 to 33
+Cost = 8.49201
+Calculating path from 33 to 34
+Cost = 8.4989
+Calculating path from 34 to 35
+Cost = 3.54643
+Calculating path from 35 to 36
+Cost = 4.82601
+Calculating path from 36 to 37
+Cost = 3.86301
+Calculating path from 37 to 38
+Cost = 9.01702
+Calculating path from 38 to 39
+Cost = 9.96325
+Calculating path from 39 to 40
+Cost = 9.8506
+Calculating path from 40 to 41
+Cost = 9.22444
+Calculating path from 41 to 42
+Cost = 11.5839
+Calculating path from 42 to 43
+Cost = 13.9462
+Calculating path from 43 to 44
+Cost = 6.9825
+Calculating path from 44 to 45
+Cost = 10.0631
+Calculating path from 45 to 46
+Cost = 2.98177
+Calculating path from 46 to 47
+Cost = 10.7481
+Calculating path from 47 to 48
+Cost = 5.21413
+Calculating path from 48 to 49
+Cost = 7.81983
+Average path cost is 7.75955
+
+***
+
+Creating graph with 50 vertices
+Generating edges for graph with density=0.4
+Generated 453 edges
+Calculating path from 0 to 1
+Cost = 7.07279
+Calculating path from 1 to 2
+Cost = 2.37129
+Calculating path from 2 to 3
+Cost = 5.79394
+Calculating path from 3 to 4
+Cost = 4.93912
+Calculating path from 4 to 5
+Cost = 1.21815
+Calculating path from 5 to 6
+Cost = 3.38277
+Calculating path from 6 to 7
+Cost = 7.25935
+Calculating path from 7 to 8
+Cost = 6.35037
+Calculating path from 8 to 9
+Cost = 5.56364
+Calculating path from 9 to 10
+Cost = 2.1009
+Calculating path from 10 to 11
+Cost = 5.33843
+Calculating path from 11 to 12
+Cost = 6.29354
+Calculating path from 12 to 13
+Cost = 5.16499
+Calculating path from 13 to 14
+Cost = 5.54001
+Calculating path from 14 to 15
+Cost = 1.56587
+Calculating path from 15 to 16
+Cost = 6.70936
+Calculating path from 16 to 17
+Cost = 3.36804
+Calculating path from 17 to 18
+Cost = 4.81118
+Calculating path from 18 to 19
+Cost = 6.68591
+Calculating path from 19 to 20
+Cost = 5.54379
+Calculating path from 20 to 21
+Cost = 4.23301
+Calculating path from 21 to 22
+Cost = 5.81574
+Calculating path from 22 to 23
+Cost = 4.83821
+Calculating path from 23 to 24
+Cost = 5.85812
+Calculating path from 24 to 25
+Cost = 3.76412
+Calculating path from 25 to 26
+Cost = 5.87688
+Calculating path from 26 to 27
+Cost = 4.17569
+Calculating path from 27 to 28
+Cost = 4.18756
+Calculating path from 28 to 29
+Cost = 4.92073
+Calculating path from 29 to 30
+Cost = 5.38051
+Calculating path from 30 to 31
+Cost = 6.09778
+Calculating path from 31 to 32
+Cost = 4.15062
+Calculating path from 32 to 33
+Cost = 4.90447
+Calculating path from 33 to 34
+Cost = 6.04589
+Calculating path from 34 to 35
+Cost = 4.24885
+Calculating path from 35 to 36
+Cost = 4.57955
+Calculating path from 36 to 37
+Cost = 7.85328
+Calculating path from 37 to 38
+Cost = 6.02711
+Calculating path from 38 to 39
+Cost = 3.95841
+Calculating path from 39 to 40
+Cost = 2.20539
+Calculating path from 40 to 41
+Cost = 5.22466
+Calculating path from 41 to 42
+Cost = 3.62362
+Calculating path from 42 to 43
+Cost = 3.34258
+Calculating path from 43 to 44
+Cost = 3.65676
+Calculating path from 44 to 45
+Cost = 2.91568
+Calculating path from 45 to 46
+Cost = 5.28655
+Calculating path from 46 to 47
+Cost = 2.61327
+Calculating path from 47 to 48
+Cost = 6.25794
+Calculating path from 48 to 49
+Cost = 6.87179
+Average path cost is 4.81609
