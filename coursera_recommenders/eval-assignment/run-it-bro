@@ -1,2 +1,2 @@
 #!/bin/bash
-mvn clean lenskit-eval -Dlenskit.eval.threadCount=4
+mvn clean lenskit-eval -Dlenskit.eval.threadCount=3
