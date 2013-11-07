@@ -26,7 +26,8 @@ def main():
         data = list(csv.DictReader(f))
     grouped = defaultdict(list)
     for test in data:
-        grouped[test['Algorithm'], test['NNbrs']].append(test)
+        nnbrs = int(test['NNbrs']) if test['NNbrs'] else ''
+        grouped[test['Algorithm'], nnbrs].append(test)
     new_data = []
     for (algo, nnbrs), group in sorted(grouped.iteritems()):
         aggregate = {
