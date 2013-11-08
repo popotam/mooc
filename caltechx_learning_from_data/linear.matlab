@@ -335,3 +335,24 @@ EOUT = calculate_error(ZOUT, YOUT, theta)
 theta = linear_regression(ZIN, YIN, LAMBDA);
 EIN = calculate_error(ZIN, YIN, theta)
 EOUT = calculate_error(ZOUT, YOUT, theta)
+
+ERR = [0 0 0 0];
+for k = -10:10
+    L = 10^k;
+    theta = linear_regression(ZIN, YIN, L);
+    EIN = calculate_error(ZIN, YIN, theta);
+    EOUT = calculate_error(ZOUT, YOUT, theta);
+    ERR(end+1, :) = [k, L, EIN, EOUT];
+end
+
+ERR
+
+L=10^-3
+theta = linear_regression(ZIN, YIN, L);
+EIN = calculate_error(ZIN, YIN, theta)
+EOUT = calculate_error(ZOUT, YOUT, theta)
+
+L=10^3
+theta = linear_regression(ZIN, YIN, L);
+EIN = calculate_error(ZIN, YIN, theta)
+EOUT = calculate_error(ZOUT, YOUT, theta)
