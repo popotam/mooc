@@ -1,17 +1,18 @@
-// Homework 2: Dijkstra's algorithm
+// Graph-related homework for C++ for C Programmers course
 //
-// This script is used to perform two experiments
-// on undirected random graphs.
-// Average shortest paths are calculated
-// for two 50-node graphs with edge density = 0.2 and 0.4
+// This files contains code for two homeworks:
+// - Homework 2: Dijkstra's algorithm
+// - Homework 3: Minimum Spanning Tree
 //
-// The program uses C++11 features.
+// Code uses C++11 features extensively.
 // Please, compile it with the -std=c++0x or -std=c++11 flag
 
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <queue>
 #include <random>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -75,14 +76,12 @@ class Vertex {
     vector<Edge> edges;  // container for vertex neighbors
 
   public:
-    // public data members used as helpers by pathfinding algorithm
-    double cost_marker;  // stores vertex cost on currently calculated path
-    bool on_closed_list;  // marks if vertex was visited on current run
-    long parent;  // id of vertex that leads to this on the shortest path
+    // public data members used as helpers by pathfinding algorithms
+    double cost_marker = INF;  // stores vertex cost on currently calculated path
+    bool on_closed_list = false;  // marks if vertex was visited on current run
+    long parent = -1;  // id of vertex that leads to this on the shortest path
 
-    Vertex() {
-      clear();
-    }
+    Vertex() {}
     ~Vertex() {}
 
     long get_id(void) {
@@ -148,11 +147,15 @@ class Graph {
       return vertices[index];
     }
 
+    vector<Vertex> get_all() {
+      return vertices;
+    }
+
     long size(void) {
       return vertices.size();
     }
 
-    // Calculates number of egdes by iterating through all of graph's vertices
+    // Calculates number of edges by iterating through all of graph's vertices
     long num_edges(void) {
       long sum = 0;
       for (auto vertex : vertices) {
@@ -187,6 +190,10 @@ class Graph {
       }
       cout << "Generated " << num_edges() << " edges" << endl;
     }
+
+    void add_edge(const int src, const int dst, const double cost) {
+      vertices[src].add(Edge(cost, dst));
+    }
 };
 
 ostream& operator<< (ostream& out, Graph graph) {
@@ -197,14 +204,31 @@ ostream& operator<< (ostream& out, Graph graph) {
 
 // Class responsible for creating a random graph with given size and density
 // and calculating average shortest paths.
-class ShortestPathExperiment {
+class GraphExperiment {
     Graph graph;
 
   public:
-    ShortestPathExperiment(const long size, const double density):graph(size) {
+    // Constructor for random graph used by Homework 2
+    GraphExperiment(const long size, const double density):graph(size) {
       graph.generate_random_edges(density);
     }
-    ~ShortestPathExperiment(){}
+    // Constructor for loading graph from file used by Homework 3
+    GraphExperiment(string filename):graph(0) {
+      cout << "Loading file '" << filename << "'" << endl;
+      ifstream input (filename);
+      // read first line for graph size
+      int size;
+      input >> size;
+      // create graph
+      graph = Graph(size);
+      // read rest of the file for edges
+      while (!input.eof()) {
+        int src, dst, cost;
+        input >> src >> dst >> cost;
+        graph.add_edge(src, dst, cost);
+      }
+    }
+    ~GraphExperiment(){}
 
     double calculate_avg_path_cost(void) {
       int succesful_paths = 0;
@@ -291,6 +315,58 @@ class ShortestPathExperiment {
       return get<1>(path);
     }
 
+    // Calculate Minimum Spanning Tree using Kruskal's algorithm
+    Graph mst() {
+      cout << "Creating Minimum Spanning Tree" << endl;
+      // create a list of all existing edges
+      // define a touple of cost, src vertex and dst vertex
+      typedef tuple<double, int, int> CostSrcDst;
+      vector<CostSrcDst> edges;
+      for (auto vertex : graph.get_all()) {
+        for (auto edge : vertex.neighbors()) {
+          if (vertex.get_id() > edge.destination) {
+            // graph is undirected, but stores an edge object for each direction
+            // we need to add only one direction to our list,
+            // so we need to continue here to avoid data duplication
+            continue;
+          }
+          // add CostSrcDst to the list
+          edges.push_back(CostSrcDst(edge.cost, vertex.get_id(), edge.destination));
+        }
+      }
+      // sort the list to be able to start with the shortest edges
+      sort(edges.begin(), edges.end());
+      // create a new graph object for the MST with the same size
+      Graph mst (graph.size());
+      // build MST in one pass through edges list
+      int added_edges = 0;
+      double total_cost = 0.0;
+      cout << "Cost\tSrc\tDst" << endl;
+      for (auto costsrcdst : edges) {
+        double cost = get<0>(costsrcdst);
+        Vertex src_vertex = graph.get(get<1>(costsrcdst));
+        Vertex dst_vertex = graph.get(get<2>(costsrcdst));
+        cout << cost << "\t" << src_vertex.get_id() << "\t" << dst_vertex.get_id() << endl;
+        if (src_vertex.on_closed_list && dst_vertex.on_closed_list) {
+          // this edge would create a cycle - we must ignore it
+          continue;
+        }
+        // add edges both ways for undirected MST
+        src_vertex.add(Edge(cost, dst_vertex.get_id()));
+        dst_vertex.add(Edge(cost, src_vertex.get_id()));
+        src_vertex.on_closed_list = true;
+        dst_vertex.on_closed_list = true;
+        added_edges += 1;
+        total_cost += cost;
+        if (added_edges == graph.size() - 1) {
+          // early exit oportunity when MST is completed
+          break;
+        }
+      }
+      cout << "Total cost: " << total_cost << endl;
+      return mst;
+    }
+
   private:
     // Private exception class that is thrown when a path could not be found
     class PathfindingError: public exception {
@@ -302,15 +378,14 @@ class ShortestPathExperiment {
 };
 
 
-// --------------------------
-// ---------- MAIN ----------
-// --------------------------
-
-int main(void) {
+// Perform two experiments on undirected random graphs.
+// Calculate average shortest paths for two 50-node graphs
+// with edge density = 0.2 and 0.4
+int homework2_dijkstra(void) {
   double avg_cost;
 
   // run first experiment with size=50, density=0.2
-  ShortestPathExperiment experiment1(50, 0.2);
+  GraphExperiment experiment1(50, 0.2);
   avg_cost = experiment1.calculate_avg_path_cost();
   cout << "Average path cost is " << avg_cost << endl;
 
@@ -318,9 +393,36 @@ int main(void) {
   cout << endl << "***" << endl << endl;
 
   // run second experiment with size=50, density=0.4
-  ShortestPathExperiment experiment2(50, 0.4);
+  GraphExperiment experiment2(50, 0.4);
   avg_cost = experiment2.calculate_avg_path_cost();
   cout << "Average path cost is " << avg_cost << endl;
 
   return 0;
+}
+
+
+// Load graph from file and generate minimum span tree
+int homework3_mst(string filename) {
+  GraphExperiment experiment(filename);
+  Graph mst = experiment.mst();
+  return 0;
+}
+
+
+// --------------------------
+// ---------- MAIN ----------
+// --------------------------
+
+int main(int argc, const char* argv[]) {
+  // Uncomment for Homework 2
+  /*
+  return homework2_dijkstra();
+  */
+
+  // Uncomment for homework 3
+  if (argc != 2) {
+    cout << "Usage: " << argv[0] << " <graph_filename>" << endl;
+    return 1;
+  }
+  return homework3_mst(argv[1]);
 }
