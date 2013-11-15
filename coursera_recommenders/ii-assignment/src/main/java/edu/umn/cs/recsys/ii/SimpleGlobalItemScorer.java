@@ -3,10 +3,13 @@ package edu.umn.cs.recsys.ii;
 import org.grouplens.lenskit.basic.AbstractGlobalItemScorer;
 import org.grouplens.lenskit.scored.ScoredId;
 import org.grouplens.lenskit.vectors.MutableSparseVector;
+import org.grouplens.lenskit.vectors.VectorEntry;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Global item scorer to find similar items.
@@ -32,5 +35,13 @@ public class SimpleGlobalItemScorer extends AbstractGlobalItemScorer {
         // TODO score items in the domain of scores
         // each item's score is the sum of its similarity to each item in items, if they are
         // neighbors in the model.
+        for (VectorEntry score: scores) {
+            long scoredItem = score.getKey();
+            for (ScoredId neighbor: model.getNeighbors(scoredItem)) {
+                if (items.contains(neighbor.getId())) {
+                    scores.add(scoredItem, neighbor.getScore());
+                }
+            }
+        }
     }
 }
