@@ -1,8 +1,12 @@
 package edu.umn.cs.recsys.ii;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Ordering;
+import com.google.common.primitives.Doubles;
+
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
+
 import org.grouplens.lenskit.collections.LongUtils;
 import org.grouplens.lenskit.core.Transient;
 import org.grouplens.lenskit.cursors.Cursor;
@@ -18,11 +22,13 @@ import org.grouplens.lenskit.vectors.ImmutableSparseVector;
 import org.grouplens.lenskit.vectors.MutableSparseVector;
 import org.grouplens.lenskit.vectors.SparseVector;
 import org.grouplens.lenskit.vectors.VectorEntry;
+import org.grouplens.lenskit.vectors.similarity.CosineVectorSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +62,43 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
 
         // TODO Compute the similarities between each pair of items
         // It will need to be in a map of longs to lists of Scored IDs to store in the model
-        return new SimpleItemItemModel(Collections.EMPTY_MAP);
+        CosineVectorSimilarity cosineSimilarity = new CosineVectorSimilarity();
+
+        for (long item: items) {
+            MutableSparseVector simVector = MutableSparseVector.create(items);
+            ImmutableSparseVector itemVector = itemVectors.get(item);
+            //System.out.format("simVector: %s\n", simVector);
+            //System.out.format("itemVector: %s\n", itemVector);
+            for (long other: items) {
+                //System.out.format("iter: %s other: %s\n", item, other);
+                ImmutableSparseVector otherVector = itemVectors.get(other);
+                //System.out.format("otherVector: %s\n", otherVector);
+                double sim = cosineSimilarity.similarity(itemVector, otherVector);
+                simVector.set(other, sim);
+            }
+            itemSimilarities.put(item, simVector);
+        }
+        
+        Map<Long,List<ScoredId>> model = new HashMap<Long,List<ScoredId>>();
+        for (Map.Entry<Long,MutableSparseVector> itemEntry: itemSimilarities.entrySet()) {
+            ScoredIdListBuilder builder = new ScoredIdListBuilder(itemEntry.getValue().size());
+            for (VectorEntry simEntry: itemEntry.getValue()) {
+                if (simEntry.getValue() > 0.0) {
+                    builder.add(simEntry.getKey(), simEntry.getValue());
+                }
+            }
+            model.put(itemEntry.getKey(), builder.sort(new HighScoreOrder()).finish());
+            //System.out.format("%s: %s\n", itemEntry.getKey(), model.get(itemEntry.getKey()));
+        }
+        
+        return new SimpleItemItemModel(model);
+    }
+
+    private static final class HighScoreOrder extends Ordering<ScoredId> {
+        @Override
+        public int compare(ScoredId left, ScoredId right) {
+            return -Doubles.compare(left.getScore(), right.getScore());
+        }
     }
 
     /**
@@ -73,7 +115,7 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
             itemData.put(item, new HashMap<Long, Double>());
         }
         // itemData should now contain a map to accumulate the ratings of each item
-
+        
         // stream over all user events
         Cursor<UserHistory<Event>> stream = userEventDao.streamEventsByUser();
         try {
@@ -81,6 +123,11 @@ public class SimpleItemItemModelBuilder implements Provider<SimpleItemItemModel>
                 MutableSparseVector vector = RatingVectorUserHistorySummarizer.makeRatingVector(evt).mutableCopy();
                 // vector is now the user's rating vector
                 // TODO Normalize this vector and store the ratings in the item data
+                double avg_rating = vector.sum() / vector.size();
+                vector.add(-avg_rating);
+                for (VectorEntry rating: vector) {
+                    itemData.get(rating.getKey()).put(evt.getUserId(), rating.getValue());
+                }
             }
         } finally {
             stream.close();

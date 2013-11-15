@@ -41,11 +41,35 @@ public class SimpleItemItemScorer extends AbstractItemScorer {
     @Override
     public void score(long user, @Nonnull MutableSparseVector scores) {
         SparseVector ratings = getUserRatingVector(user);
+        double avg_rating = ratings.sum() / ratings.size();
 
         for (VectorEntry e: scores.fast(VectorEntry.State.EITHER)) {
             long item = e.getKey();
             List<ScoredId> neighbors = model.getNeighbors(item);
             // TODO Score this item and save the score into scores
+            double score = 0.0;
+            double weight = 0.0;
+            long count = 0;
+            for (ScoredId neighbor: neighbors) {
+                if (neighbor.getId() == item) {
+                    //System.out.format("SELF ");
+                    continue;
+                }
+                //System.out.format("%s ", count);
+                if (ratings.containsKey(neighbor.getId())) {
+                    //System.out.format("(%s) ", neighbor.getScore());
+                    score += (ratings.get(neighbor.getId()) - avg_rating) * neighbor.getScore();
+                    weight += neighbor.getScore();
+                    count++;
+                }
+                if (count >= neighborhoodSize) {
+                    break;
+                }
+            }
+            score /= weight;
+            score += avg_rating;
+            //System.out.format("\nScore: %s\n", score);
+            scores.set(e, score);
         }
     }
 
