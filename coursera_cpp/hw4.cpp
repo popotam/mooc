@@ -15,6 +15,7 @@
 #include <random>
 #include <string>
 #include <tuple>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -585,7 +586,84 @@ class HexGame {
     }
 
     Color check_winner(void) {
+      unordered_set<long> left_edge, right_edge, upper_edge, lower_edge;
+
+      // find BLUE vertices on BLUE edges
+      for (int y = 0; y < size(); ++y) {
+        if (get(0, y).get_color() == Color::BLUE) {
+          left_edge.insert(get(0, y).get_id());
+        }
+        if (get(size() - 1, y).get_color() == Color::BLUE) {
+          right_edge.insert(get(size() - 1, y).get_id());
+        }
+      }
+      if (exists_path(left_edge, right_edge, Color::BLUE)) {
+        return Color::BLUE;
+      }
+
+      // find RED vertices on RED edges
+      for (int x = 0; x < size(); ++x) {
+        if (get(x, 0).get_color() == Color::RED) {
+          upper_edge.insert(get(x, 0).get_id());
+        }
+        if (get(x, size() - 1).get_color() == Color::RED) {
+          lower_edge.insert(get(x, size() - 1).get_id());
+        }
+      }
+      if (exists_path(upper_edge, lower_edge, Color::RED)) {
+        return Color::RED;
+      }
+
       return Color::NONE;
+    }
+
+    // Check if path exists from a set of vertices to a set of vertices.
+    // Uses modified Dijkstra's algorithm that allows a set of sources
+    // and a set of destinations and is not interested in shortest path,
+    // but only wether a path exists.
+    bool exists_path(const unordered_set<long> &src, const unordered_set<long> &dst, Color color) {
+      if (src.empty() || dst.empty()) {
+        return false;
+      }
+      // prepare a priority queue for the algorithm
+      priority_queue<Vertex, vector<Vertex>, OrderByCostMarker> open_queue;
+      bool success = false;
+      // clear board of pathfinding markers
+      board.clear();
+      // set src vertices cost_marker to 0.0 and add them to open queue
+      for (long vertex: src) {
+        Vertex current = board.get(vertex);
+        current.cost_marker = 0.0;
+        open_queue.push(current);
+      }
+
+      while (!open_queue.empty()) {
+        // get node with lowest cost from the queue
+        Vertex current = open_queue.top();
+        open_queue.pop();
+        // check if current node is destination node
+        if (dst.find(current.get_id()) != dst.end()) {
+          success = true;
+          break;
+        }
+        // check each neighbor of current vertex
+        for (auto edge: current.neighbors()) {
+          Vertex neighbor = board.get(edge.destination);
+          if (neighbor.on_closed_list) {
+            // omit neighbors on closed list
+            continue;
+          }
+          // update neighbor cost and set parent on path
+          if (neighbor.cost_marker > current.cost_marker + edge.cost) {
+            neighbor.cost_marker = current.cost_marker + edge.cost;
+            neighbor.parent = current.get_id();
+            open_queue.push(neighbor);
+          }
+        }
+        // mark current as visited
+        current.on_closed_list = true;
+      }
+      return success;
     }
 
     friend ostream& operator<< (ostream& out, HexGame &game) {
