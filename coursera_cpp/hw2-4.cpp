@@ -3,7 +3,7 @@
 // This files contains code for two homeworks:
 // - Homework 2: Dijkstra's algorithm
 // - Homework 3: Minimum Spanning Tree
-// - Homework 4: HEX game board
+// - Homework 4: Play HEX game without
 //
 // Code uses C++11 features extensively.
 // Please, compile it with the -std=c++0x or -std=c++11 flag
@@ -719,7 +719,13 @@ class HexGame {
 };
 
 
-// Run HEX game without AI
+// Homework 4: Run HEX game without AI
+//
+// Expectations:
+// - Be able to draw the board using ASCII symbols and a given size,
+//   such as 7 by 7 or 11 by 11.
+// - Input a move and determine if a move is legal.
+// - Determine who won.
 int homework4_hex() {
   // ask for board size
   int size = 0;
