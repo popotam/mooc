@@ -54,6 +54,7 @@ const string GAME_RULES = (
 "  - BLUE player needs to connect left and right edges of the board.\n"
 "\n");
 
+
 // --------------------------------
 // Prepare random number generators
 // --------------------------------
@@ -506,7 +507,9 @@ int homework3_mst(string filename) {
 
 class HexGame {
     Graph board;
+
   public:
+    // The constructor initializes board graph with size * size vertices
     HexGame(const int size):board(size * size) {
       board.generate_hex_edges();
     }
@@ -516,10 +519,12 @@ class HexGame {
       return sqrt(board.size());
     }
 
+    // get board graph vertices by (X, Y) dimension
     Vertex& get(const int x, const int y) {
       return board.get(x + y * size());
     }
 
+    // Start the HEX game
     int start(void) {
       Color player = Color::BLUE;  // BLUE player starts the game
       Color winner = Color::NONE;
@@ -554,6 +559,7 @@ class HexGame {
           error_message = "FIELD IS ALREADY OCCUPIED! Choose another one.";
           continue;
         }
+
         // clear error message
         error_message = "";
 
@@ -585,6 +591,10 @@ class HexGame {
       return 0;
     }
 
+    // Checks which color won.
+    // It looks for a BLUE path from left ot right edge
+    // or a RED path from upper to lower edge.
+    // If no winner is found it returns Color::NONE
     Color check_winner(void) {
       unordered_set<long> left_edge, right_edge, upper_edge, lower_edge;
 
@@ -597,6 +607,7 @@ class HexGame {
           right_edge.insert(get(size() - 1, y).get_id());
         }
       }
+      // check if edges are connected
       if (exists_path(left_edge, right_edge, Color::BLUE)) {
         return Color::BLUE;
       }
@@ -610,10 +621,12 @@ class HexGame {
           lower_edge.insert(get(x, size() - 1).get_id());
         }
       }
+      // check if edges are connected
       if (exists_path(upper_edge, lower_edge, Color::RED)) {
         return Color::RED;
       }
 
+      // no winner found
       return Color::NONE;
     }
 
@@ -666,6 +679,7 @@ class HexGame {
       return success;
     }
 
+    // print game board in ASCII art fashion
     friend ostream& operator<< (ostream& out, HexGame &game) {
       int size = game.size();
 
