@@ -37,9 +37,9 @@ ostream& operator<< (ostream& out, Color color) {
     case Color::NONE:
       return out << ".";
     case Color::RED:
-      return out << "X";
+      return out << "R";
     case Color::BLUE:
-      return out << "O";
+      return out << "B";
   }
 }
 
@@ -47,8 +47,8 @@ const string GAME_RULES = (
 "HEX GAME\n"
 "\n"
 "Rules:\n"
-"  - RED player places X.\n"
-"  - BLUE player places O.\n"
+"  - Each player places markers in turn, like in TIC-TAC-TOE\n"
+"  - BLUE player starts.\n"
 "  - RED player needs to connect upper and lower edges of the board.\n"
 "  - BLUE player needs to connect left and right edges of the board.\n"
 "\n");
@@ -520,36 +520,41 @@ class HexGame {
     }
 
     int start(void) {
-      Color player = Color::RED;  // RED player starts the game
+      Color player = Color::BLUE;  // BLUE player starts the game
       Color winner = Color::NONE;
-      string error = "";
-      while (!winner) {
-        // ask for next move
-        int move_x = -1;
-        int move_y = -1;
-        char separator = ',';
-        // clear screen and print error message and board
-        cout << string(50, '\n') << GAME_RULES << error << endl << endl << *this;
-        cout << endl << "Player " << player;
+      string error_message = "";
+      while (!winner) {  // MAIN GAME LOOP
+        int move_x, move_y;
+        char separator;
+
+        // print game on screen
+        cout << string(50, '\n');  // clear screen
+        cout << GAME_RULES << error_message << endl << endl;
+        cout << *this;  // print game board
+        cout << endl << (player == Color::BLUE ? "BLUE" : "RED");
         cout << ", please specify your move (ex. '3,5'):" << endl;
+
+        // get input
         cin >> move_x >> separator >> move_y;
+
+        // validate input
         if (cin.fail()) {
           fix_cin();
-          error = "INCORRECT INPUT!";
+          error_message = "INCORRECT INPUT!";
           continue;
         }
         if (!(0 <= move_x && move_x < size()
               && 0 <= move_y && move_y < size()
               && separator == ',')) {
-          error = "INCORRECT INPUT!";
+          error_message = "INCORRECT INPUT!";
           continue;
         }
         if (get(move_x, move_y).get_color() != Color::NONE) {
-          error = "FIELD IS ALREADY OCCUPIED! Choose another one.";
+          error_message = "FIELD IS ALREADY OCCUPIED! Choose another one.";
           continue;
         }
         // clear error message
-        error = "";
+        error_message = "";
 
         // place color on specified field
         get(move_x, move_y).set_color(player);
