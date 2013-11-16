@@ -735,7 +735,7 @@ int homework4_hex() {
       fix_cin();
     }
   }
-  // create and start gema
+  // create and start game
   return HexGame(size).start();
 }
 
