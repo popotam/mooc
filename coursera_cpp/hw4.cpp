@@ -29,20 +29,29 @@ const double MIN_COST = 1.0;
 const double MAX_COST = 10.0;
 const double INF = numeric_limits<double>::infinity();
 
-enum class Color {NONE, BLUE, RED};
+enum class Color {NONE, RED, BLUE};
 
 // Color enum should be printable
 ostream& operator<< (ostream& out, Color color) {
   switch (color) {
     case Color::NONE:
       return out << ".";
-    case Color::BLUE:
-      return out << "O";
     case Color::RED:
       return out << "X";
+    case Color::BLUE:
+      return out << "O";
   }
 }
 
+const string GAME_RULES = (
+"HEX GAME\n"
+"\n"
+"Rules:\n"
+"  - RED player places X.\n"
+"  - BLUE player places O.\n"
+"  - RED player needs to connect upper and lower edges of the board.\n"
+"  - BLUE player needs to connect left and right edges of the board.\n"
+"\n");
 
 // --------------------------------
 // Prepare random number generators
@@ -520,7 +529,7 @@ class HexGame {
         int move_y = -1;
         char separator = ',';
         // clear screen and print error message and board
-        cout << string(50, '\n') << error << endl << endl << *this;
+        cout << string(50, '\n') << GAME_RULES << error << endl << endl << *this;
         cout << endl << "Player " << player;
         cout << ", please specify your move (ex. '3,5'):" << endl;
         cin >> move_x >> separator >> move_y;
@@ -576,7 +585,6 @@ class HexGame {
 
     friend ostream& operator<< (ostream& out, HexGame &game) {
       int size = game.size();
-      out << "HEX board " << size << "x" << size << endl;
 
       // print column labels
       out << "   ";
