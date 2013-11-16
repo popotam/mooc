@@ -19,28 +19,30 @@
 
 using namespace std;
 
+
 // -------------------
 // Constant parameters
 // -------------------
 
-const int DEFAULT_GRAPH_SIZE = 50;
+const long DEFAULT_GRAPH_SIZE = 50;
 const double MIN_COST = 1.0;
 const double MAX_COST = 10.0;
 const double INF = numeric_limits<double>::infinity();
 
-enum class Color {GRAY, BLUE, RED};
+enum class Color {NONE, BLUE, RED};
 
 // Color enum should be printable
 ostream& operator<< (ostream& out, Color color) {
   switch (color) {
-    case Color::GRAY:
+    case Color::NONE:
       return out << ".";
     case Color::BLUE:
-      return out << "X";
-    case Color::RED:
       return out << "O";
+    case Color::RED:
+      return out << "X";
   }
 }
+
 
 // --------------------------------
 // Prepare random number generators
@@ -59,6 +61,21 @@ double random_cost(void) {
 // Returns true if an edge is selected
 double random_edge(double density) {
   return r_probability(r_engine) <= density;
+}
+
+
+// -----------------
+// Utility functions
+// -----------------
+
+// fix std:cin after unparseable input
+// my OS demands multiple calls to ignore, clear and sync
+void fix_cin() {
+  cin.ignore();
+  cin.clear();
+  cin.sync();
+  cin.ignore();
+  cin.clear();
 }
 
 
@@ -88,10 +105,9 @@ ostream& operator<< (ostream& out, Edge edge) {
 class Vertex {
     long id;  // set later by the Graph constructor
     vector<Edge> edges;  // container for vertex neighbors
+    Color color = Color::NONE;  // color for HEX game
 
   public:
-    Color color = Color::GRAY;  // color for HEX game
-
     // public data members used as helpers by pathfinding algorithms
     double cost_marker = INF;  // stores vertex cost on currently calculated path
     bool on_closed_list = false;  // marks if vertex was visited on current run
@@ -106,6 +122,14 @@ class Vertex {
 
     void set_id(long new_id) {
       id = new_id;
+    }
+
+    Color get_color(void) {
+      return color;
+    }
+
+    void set_color(Color new_color) {
+      color = new_color;
     }
 
     long size(void) {
@@ -126,11 +150,9 @@ class Vertex {
     vector<Edge> neighbors(void) {
       return edges;
     }
-
-};
-
-ostream& operator<< (ostream& out, Vertex vertex) {
-  return out << "Vertex(" << vertex.size() << ")";
+    friend ostream& operator<< (ostream& out, Vertex vertex) {
+      return out << "Vertex(" << vertex.size() << ")";
+    };
 };
 
 
@@ -169,6 +191,17 @@ class Graph {
 
     long size(void) {
       return vertices.size();
+    }
+
+    // Overloaded size used to check how many fields of color are there
+    long size(Color color) {
+      long num_color = 0;
+      for (auto vertex: vertices) {
+        if (vertex.get_color() == color) {
+          num_color += 1;
+        }
+      }
+      return num_color;
     }
 
     // Calculates number of edges by iterating through all of graph's vertices
@@ -237,12 +270,12 @@ class Graph {
     void add_edge(const int src, const int dst, const double cost) {
       vertices[src].add(Edge(cost, dst));
     }
-};
 
-ostream& operator<< (ostream& out, Graph graph) {
-  return out << "Graph(vertices=" << graph.size()
-    << ", edges=" << graph.num_edges() << ")";
-}
+    friend ostream& operator<< (ostream& out, Graph & graph) {
+      return out << "Graph(vertices=" << graph.size()
+        << ", edges=" << graph.num_edges() << ")";
+    }
+};
 
 
 // ----------------------
@@ -456,9 +489,9 @@ int homework3_mst(string filename) {
 }
 
 
-// ----------------------
-// Homework 2 & 3 Classes
-// ----------------------
+// ------------------
+// Homework 4 Classes
+// ------------------
 
 
 class HexGame {
@@ -473,75 +506,126 @@ class HexGame {
       return sqrt(board.size());
     }
 
-    Vertex get(const int x, const int y) {
+    Vertex& get(const int x, const int y) {
       return board.get(x + y * size());
+    }
+
+    int start(void) {
+      Color player = Color::RED;  // RED player starts the game
+      Color winner = Color::NONE;
+      string error = "";
+      while (!winner) {
+        // ask for next move
+        int move_x = -1;
+        int move_y = -1;
+        char separator = ',';
+        // clear screen and print error message and board
+        cout << string(50, '\n') << error << endl << endl << *this;
+        cout << endl << "Player " << player;
+        cout << ", please specify your move (ex. '3,5'):" << endl;
+        cin >> move_x >> separator >> move_y;
+        if (cin.fail()) {
+          fix_cin();
+          error = "INCORRECT INPUT!";
+          continue;
+        }
+        if (!(0 <= move_x && move_x < size()
+              && 0 <= move_y && move_y < size()
+              && separator == ',')) {
+          error = "INCORRECT INPUT!";
+          continue;
+        }
+        if (get(move_x, move_y).get_color() != Color::NONE) {
+          error = "FIELD IS ALREADY OCCUPIED! Choose another one.";
+          continue;
+        }
+        // clear error message
+        error = "";
+
+        // place color on specified field
+        get(move_x, move_y).set_color(player);
+
+        // switch players
+        if (player == Color::RED) {
+          player = Color::BLUE;
+        } else {
+          player = Color::RED;
+        }
+
+        // check winner
+        winner = check_winner();
+
+        // if no empty fields are available call it a tie and break out
+        if (winner == Color::NONE && board.size(Color::NONE) == 0) {
+          break;
+        }
+      }
+
+      // print winner and exit
+      if (winner == Color::NONE) {
+        cout << "It was a tie.";
+      } else {
+        cout << "Player " << winner << " has won! Congratulations!!1!" << endl;
+      }
+      return 0;
+    }
+
+    Color check_winner(void) {
+      return Color::NONE;
+    }
+
+    friend ostream& operator<< (ostream& out, HexGame &game) {
+      int size = game.size();
+      out << "HEX board " << size << "x" << size << endl;
+
+      // print column labels
+      out << "   ";
+      for (int x = 0; x < size; ++x) {
+        out << ((x < 10) ? " ": "") << x << "  ";
+      }
+      out << endl;
+
+      // print nodes and edges
+      for (int y = 0; y < size; ++y) {
+        // print row label
+        out << string(y * 2, ' ');
+        out << ((y < 10) ? " ": "") << y << " ";
+
+        // print nodes
+        for (int x = 0; x < size; ++x) {
+          out << " " << game.get(x, y).get_color();
+          if (x < size - 1) {
+            out << " -";
+          }
+        }
+        out << endl;
+
+        // draw SW and SE edges
+        if (y < size - 1) {
+          out << string(5 + y * 2, ' ');
+          for (int x = 0; x < size - 1; ++x) {
+            out << "\\ / ";
+          }
+          out << "\\" << endl;
+        }
+      }
+      return out;
     }
 };
 
-ostream& operator<< (ostream& out, HexGame game) {
-  int size = game.size();
-  out << string(50, '\n');
-  out << "HEX board " << size << "x" << size << endl;
-
-  // print column labels
-  out << "   ";
-  for (int x = 0; x < size; ++x) {
-    out << ((x < 10) ? " ": "") << x << "  ";
-  }
-  out << endl;
-
-  // print nodes and edges
-  for (int y = 0; y < size; ++y) {
-    // print row label
-    out << string(y * 2, ' ');
-    out << ((y < 10) ? " ": "") << y << " ";
-
-    // print nodes
-    for (int x = 0; x < size; ++x) {
-      out << " " << game.get(x, y).color;
-      if (x < size - 1) {
-        out << " -";
-      }
-    }
-    out << endl;
-
-    // draw SW and SE edges
-    if (y < size - 1) {
-      out << string(5 + y * 2, ' ');
-      for (int x = 0; x < size - 1; ++x) {
-        out << "\\ / ";
-      }
-      out << "\\" << endl;
-    }
-  }
-  return out;
-}
-
-
-// fix std:cin after unparseable input
-// my OS demands multiple calls to ignore, clear and sync
-void fix_cin() {
-  cin.ignore();
-  cin.clear();
-  cin.sync();
-  cin.ignore();
-  cin.clear();
-}
 
 // Run HEX game without AI
 int homework4_hex() {
   // ask for board size
   int size = 0;
-  while (!(size == 7 || size == 11)) {
-    cout << "Specify board size (7 or 11):" << endl;
+  while (size < 4 || size > 11) {
+    cout << "Specify board size (from 4 to 11):" << endl;
     if (!(cin >> size)) {
       fix_cin();
     }
   }
-  // create board
-  HexGame game (size);
-  cout << game;
-  return 0;
+  // create and start gema
+  return HexGame(size).start();
 }
 
 // --------------------------
