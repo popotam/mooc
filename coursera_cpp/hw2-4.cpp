@@ -594,7 +594,7 @@ class HexGame {
     // It is pretty efficient even if only few fields are left,
     // because it avoids full graph scan for empty fields.
     void ask_random_ai_for_move(Color player) {
-      uniform_int_distribution<> random_move(0, size());
+      uniform_int_distribution<> random_move(0, size() - 1);
       do {
         move_x = random_move(r_engine);
         move_y = random_move(r_engine);
