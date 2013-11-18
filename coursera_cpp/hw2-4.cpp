@@ -3,10 +3,10 @@
 // This files contains code for two homeworks:
 // - Homework 2: Dijkstra's algorithm
 // - Homework 3: Minimum Spanning Tree
-// - Homework 4: Play HEX game without
+// - Homework 4: Play HEX game with random AI
 //
 // Code uses C++11 features extensively.
-// Please, compile it with the -std=c++0x or -std=c++11 flag
+// Please, compile it with the --std=c++11 flag
 
 #include <algorithm>
 #include <fstream>
