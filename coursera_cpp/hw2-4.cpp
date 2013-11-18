@@ -8,6 +8,7 @@
 // Code uses C++11 features extensively.
 // Please, compile it with the -std=c++0x or -std=c++11 flag
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -30,6 +31,17 @@ const double MIN_COST = 1.0;
 const double MAX_COST = 10.0;
 const double INF = numeric_limits<double>::infinity();
 
+const string GAME_RULES = (
+  "HEX GAME\n"
+  "\n"
+  "Rules:\n"
+  "  - Each player places markers in turn, like in TIC-TAC-TOE\n"
+  "  - BLUE player starts.\n"
+  "  - RED player needs to connect upper and lower edges of the board.\n"
+  "  - BLUE player needs to connect left and right edges of the board.\n"
+  "\n"
+);
+
 enum class Color {NONE, RED, BLUE};
 
 // Color enum should be printable
@@ -43,16 +55,6 @@ ostream& operator<< (ostream& out, Color color) {
       return out << "B";
   }
 }
-
-const string GAME_RULES = (
-"HEX GAME\n"
-"\n"
-"Rules:\n"
-"  - Each player places markers in turn, like in TIC-TAC-TOE\n"
-"  - BLUE player starts.\n"
-"  - RED player needs to connect upper and lower edges of the board.\n"
-"  - BLUE player needs to connect left and right edges of the board.\n"
-"\n");
 
 
 // --------------------------------
@@ -202,17 +204,6 @@ class Graph {
 
     long size(void) {
       return vertices.size();
-    }
-
-    // Overloaded size used to check how many fields of color are there
-    long size(Color color) {
-      long num_color = 0;
-      for (auto vertex: vertices) {
-        if (vertex.get_color() == color) {
-          num_color += 1;
-        }
-      }
-      return num_color;
     }
 
     // Calculates number of edges by iterating through all of graph's vertices
@@ -508,6 +499,10 @@ int homework3_mst(string filename) {
 class HexGame {
     Graph board;
 
+    int move_x, move_y;  // stores current move coordinates
+
+
+
   public:
     // The constructor initializes board graph with size * size vertices
     HexGame(const int size):board(size * size) {
@@ -528,15 +523,46 @@ class HexGame {
     int start(void) {
       Color player = Color::BLUE;  // BLUE player starts the game
       Color winner = Color::NONE;
+      while (winner == Color::NONE) {  // MAIN GAME LOOP
+
+        // ask for move_x and move_y
+        if (player == Color::BLUE) {
+          ask_player_for_move(player);
+        } else {
+          ask_random_ai_for_move(player);
+        }
+
+        // place color on specified field
+        get(move_x, move_y).set_color(player);
+
+        // switch players
+        if (player == Color::BLUE) {
+          player = Color::RED;
+        } else {
+          player = Color::BLUE;
+        }
+
+        // check winner
+        winner = check_winner();
+      }
+
+      // print winner and exit
+      show_UI();
+      cout << "Player " << winner << " has won! Congratulations!!!" << endl;
+      return 0;
+    }
+
+    // Ask human player for move.
+    // It shows a user interface and scans stdin for move coordinates.
+    // If there were any errors a message will be displayed and user
+    // must repeat the process.
+    void ask_player_for_move(Color player) {
       string error_message = "";
-      while (!winner) {  // MAIN GAME LOOP
-        int move_x, move_y;
+      while (true) {
         char separator;
 
-        // print game on screen
-        cout << string(50, '\n');  // clear screen
-        cout << GAME_RULES << error_message << endl << endl;
-        cout << *this;  // print game board
+        // user interface
+        show_UI(error_message);
         cout << endl << (player == Color::BLUE ? "BLUE" : "RED");
         cout << ", please specify your move (ex. '3,5'):" << endl;
 
@@ -559,36 +585,28 @@ class HexGame {
           error_message = "FIELD IS ALREADY OCCUPIED! Choose another one.";
           continue;
         }
-
-        // clear error message
-        error_message = "";
-
-        // place color on specified field
-        get(move_x, move_y).set_color(player);
-
-        // switch players
-        if (player == Color::RED) {
-          player = Color::BLUE;
-        } else {
-          player = Color::RED;
-        }
-
-        // check winner
-        winner = check_winner();
-
-        // if no empty fields are available call it a tie and break out
-        if (winner == Color::NONE && board.size(Color::NONE) == 0) {
-          break;
-        }
+        // move_x and move_y successfully set, we can break and return
+        break;
       }
+    }
 
-      // print winner and exit
-      if (winner == Color::NONE) {
-        cout << "It was a tie.";
-      } else {
-        cout << "Player " << winner << " has won! Congratulations!!1!" << endl;
-      }
-      return 0;
+    // Generates random moves until an empty field is found.
+    // It is pretty efficient even if only few fields are left,
+    // because it avoids full graph scan for empty fields.
+    void ask_random_ai_for_move(Color player) {
+      uniform_int_distribution<> random_move(0, size());
+      do {
+        move_x = random_move(r_engine);
+        move_y = random_move(r_engine);
+      } while (get(move_x, move_y).get_color() != Color::NONE);
+    }
+
+    // Displays User Interface
+    void show_UI(string error_message="") {
+      cout << string(50, '\n');  // clear screen
+      cout << GAME_RULES;
+      cout << error_message << endl << endl;  // display error message box
+      cout << *this;  // print game board
     }
 
     // Checks which color won.
