@@ -8,7 +8,7 @@ import csv
 
 
 ROWS = [
-    'Algorithm', 'Partition', 'DataSet', 'NNbrs', 'BuildTime', 'TestTime',
+    'Algorithm', 'Partition', 'DataSet', 'FeatureCount', 'BuildTime', 'TestTime',
     'NUsers', 'NAttempted', 'NGood', 'Coverage', 'RMSE.ByRating', 'RMSE.ByUser',
     'nDCG', 'TopN.nDCG'
 ]
@@ -26,15 +26,15 @@ def main():
         data = list(csv.DictReader(f))
     grouped = defaultdict(list)
     for test in data:
-        nnbrs = int(test['NNbrs']) if test['NNbrs'] else ''
-        grouped[test['Algorithm'], test['DataSet'], nnbrs].append(test)
+        feature_count = int(test['FeatureCount']) if test['FeatureCount'] else ''
+        grouped[test['Algorithm'], test['DataSet'], feature_count].append(test)
     new_data = []
-    for (algo, dataset, nnbrs), group in sorted(grouped.iteritems()):
+    for (algo, dataset, feature_count), group in sorted(grouped.iteritems()):
         aggregate = {
             'Algorithm': algo,
             'Partition': '',
             'DataSet': dataset,
-            'NNbrs': nnbrs,
+            'FeatureCount': feature_count,
         }
         for key in ROWS[4:]:
             values = [
