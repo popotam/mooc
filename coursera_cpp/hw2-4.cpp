@@ -250,17 +250,17 @@ class Graph {
         for (int y = 0; y < board_size; ++y) {
           int current = y * board_size + x;
           // add E connection
-          if (x <= board_size) {
+          if (x < board_size - 1) {
             vertices[current].add(Edge(1.0, current + 1));
             vertices[current + 1].add(Edge(1.0, current));
           }
           // add SE connection
-          if (y <= board_size) {
+          if (y < board_size - 1) {
             vertices[current].add(Edge(1.0, current + board_size));
             vertices[current + board_size].add(Edge(1.0, current));
           }
           // add SW connection
-          if (x >= 0 && y <= board_size) {
+          if (x > 0 && y < board_size - 1) {
             vertices[current].add(Edge(1.0, current + board_size - 1));
             vertices[current + board_size - 1].add(Edge(1.0, current));
           }
